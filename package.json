@@ -1,0 +1,16 @@
+{
+  "name": "substrate-plugin",
+  "main": "./lib/substrate-plugin",
+  "version": "0.1.0",
+  "description": "Plugin for Parity Substrate",
+  "keywords": [],
+  "activationCommands": {
+    "atom-workspace": "substrate-plugin:toggle"
+  },
+  "repository": "https://github.com/everstake/atom-plugin-substrate",
+  "license": "Apache-2.0",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {}
+}

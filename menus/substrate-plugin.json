@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle substrate-plugin",
+        "command": "substrate-plugin:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "substrate-plugin",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "substrate-plugin:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
