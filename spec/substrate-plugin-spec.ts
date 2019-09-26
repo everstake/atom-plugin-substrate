@@ -1,6 +1,7 @@
 'use babel';
 
-import SubstratePlugin from '../lib/substrate-plugin';
+// import SubstratePlugin from '../lib/substrate-plugin';
+// import { expect } from 'mocha';
 
 // Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
 //
@@ -8,7 +9,7 @@ import SubstratePlugin from '../lib/substrate-plugin';
 // or `fdescribe`). Remove the `f` to unfocus the block.
 
 describe('SubstratePlugin', () => {
-  let workspaceElement, activationPromise;
+  let workspaceElement: any, activationPromise: any;
 
   beforeEach(() => {
     workspaceElement = atom.views.getView(atom.workspace);
@@ -36,9 +37,9 @@ describe('SubstratePlugin', () => {
         expect(substratePluginElement).toExist();
 
         let substratePluginPanel = atom.workspace.panelForItem(substratePluginElement);
-        expect(substratePluginPanel.isVisible()).toBe(true);
+        expect(substratePluginPanel!.isVisible()).toBe(true);
         atom.commands.dispatch(workspaceElement, 'substrate-plugin:toggle');
-        expect(substratePluginPanel.isVisible()).toBe(false);
+        expect(substratePluginPanel!.isVisible()).toBe(false);
       });
     });
 

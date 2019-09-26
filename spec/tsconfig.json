@@ -1,0 +1,13 @@
+{
+  "extends": "../lib/tsconfig.json",
+  "compilerOptions": {
+    "types": [
+        "node",
+        "mocha",
+        "jasmine",
+        "jest"
+    ]
+  },
+  "compileOnSave": false,
+  "include": ["./**/*.ts", "./**/*.tsx", "../lib/**/*.ts", "../lib/**/*.tsx"]
+}

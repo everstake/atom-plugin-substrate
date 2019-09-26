@@ -1,9 +1,15 @@
 {
   "name": "substrate-plugin",
-  "main": "./lib/substrate-plugin",
+  "main": "./dist/substrate-plugin",
   "version": "0.1.0",
   "description": "Plugin for Parity Substrate",
-  "keywords": [],
+  "keywords": [
+    "substrate",
+    "parity",
+    "polkadot",
+    "web3",
+    "everstake"
+  ],
   "activationCommands": {
     "atom-workspace": "substrate-plugin:toggle"
   },
@@ -12,5 +18,25 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "dependencies": {}
+  "scripts": {
+    "build": "tsc -p ./lib",
+    "typecheck": "tsc --noEmit -p ./lib && tsc --noEmit -p ./spec",
+    "lint": "tslint --project ./lib && tslint --project ./spec",
+    "test": "yarn run typecheck && yarn run lint"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/atom": "^1.36.1",
+    "@types/chai": "^4.2.3",
+    "@types/jasmine": "^3.4.0",
+    "@types/jest": "^24.0.18",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.7.8",
+    "chai": "^4.2.0",
+    "jasmine": "^3.5.0",
+    "jest": "^24.9.0",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.3",
+    "typescript-tslint-plugin": "^0.5.4"
+  }
 }

@@ -1,8 +1,9 @@
 'use babel';
 
 export default class SubstratePluginView {
+  private element: HTMLElement;
 
-  constructor(serializedState) {
+  constructor(_serializedState: any) {
     // Create root element
     this.element = document.createElement('div');
     this.element.classList.add('substrate-plugin');
@@ -25,5 +26,4 @@ export default class SubstratePluginView {
   getElement() {
     return this.element;
   }
-
 }
