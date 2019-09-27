@@ -1,5 +1,3 @@
-'use babel';
-
 import SubstratePluginView from './substrate-plugin-view';
 import { CompositeDisposable, Panel } from 'atom';
 
@@ -7,8 +5,11 @@ export default {
   substratePluginView: null as SubstratePluginView | null,
   modalPanel: null as Panel<HTMLElement> | null,
   subscriptions: null as CompositeDisposable | null,
+  statusBarTile: null as any | null,
 
   activate(state: any) {
+    console.log('Activating substrate plugin...');
+
     this.substratePluginView = new SubstratePluginView(state.substratePluginViewState);
     this.modalPanel = atom.workspace.addModalPanel({
       item: this.substratePluginView.getElement(),
@@ -34,6 +35,21 @@ export default {
     return {
       substratePluginViewState: this.substratePluginView!.serialize()
     };
+  },
+
+  consumeStatusBar(statusBar: any) {
+    const div = document.createElement("div");
+    div.classList.add("inline-block");
+    const icon = document.createElement("span");
+    icon.textContent = "Substrate";
+    const link = document.createElement("a");
+    link.appendChild(icon);
+    link.onclick = (_e) => {
+      this.toggle();
+    };
+    atom.tooltips.add(div, { title: "Toggle Substrate plugin sidebar" });
+    div.appendChild(link);
+    this.statusBarTile = statusBar.addRightTile({ item: div, priority: 0 });
   },
 
   toggle() {

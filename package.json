@@ -1,6 +1,6 @@
 {
   "name": "substrate-plugin",
-  "main": "./dist/substrate-plugin",
+  "main": "./dist/substrate-plugin.js",
   "version": "0.1.0",
   "description": "Plugin for Parity Substrate",
   "keywords": [
@@ -18,7 +18,15 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
+  "consumedServices": {
+    "status-bar": {
+      "versions": {
+        "^1.0.0": "consumeStatusBar"
+      }
+    }
+  },
   "scripts": {
+    "install": "tsc -p ./lib",
     "build": "tsc -p ./lib",
     "typecheck": "tsc --noEmit -p ./lib && tsc --noEmit -p ./spec",
     "lint": "tslint --project ./lib && tslint --project ./spec",

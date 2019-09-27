@@ -1,5 +1,4 @@
 "use strict";
-'use babel';
 Object.defineProperty(exports, "__esModule", { value: true });
 const substrate_plugin_view_1 = require("./substrate-plugin-view");
 const atom_1 = require("atom");
@@ -7,7 +6,9 @@ exports.default = {
     substratePluginView: null,
     modalPanel: null,
     subscriptions: null,
+    statusBarTile: null,
     activate(state) {
+        console.log('Activating substrate plugin...');
         this.substratePluginView = new substrate_plugin_view_1.default(state.substratePluginViewState);
         this.modalPanel = atom.workspace.addModalPanel({
             item: this.substratePluginView.getElement(),
@@ -29,6 +30,20 @@ exports.default = {
         return {
             substratePluginViewState: this.substratePluginView.serialize()
         };
+    },
+    consumeStatusBar(statusBar) {
+        const div = document.createElement("div");
+        div.classList.add("inline-block");
+        const icon = document.createElement("span");
+        icon.textContent = "Substrate";
+        const link = document.createElement("a");
+        link.appendChild(icon);
+        link.onclick = (_e) => {
+            this.toggle();
+        };
+        atom.tooltips.add(div, { title: "Toggle Substrate plugin sidebar" });
+        div.appendChild(link);
+        this.statusBarTile = statusBar.addRightTile({ item: div, priority: 0 });
     },
     toggle() {
         console.log('SubstratePlugin was toggled!');
