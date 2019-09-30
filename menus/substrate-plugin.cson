@@ -16,10 +16,6 @@
 						label: 'Toggle substrate-plugin'
 						command: 'substrate-plugin:toggle'
 					}
-					{
-						label: 'Test command'
-						command: 'substrate-plugin:test'
-					}
 				]
 			}
 		]
