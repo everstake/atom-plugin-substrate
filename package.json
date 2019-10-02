@@ -1,6 +1,6 @@
 {
   "name": "substrate-plugin",
-  "main": "./dist/substrate-plugin.js",
+  "main": "./lib/index",
   "version": "0.1.0",
   "description": "Plugin for Parity Substrate",
   "keywords": [
@@ -10,13 +10,15 @@
     "web3",
     "everstake"
   ],
-  "activationCommands": {
-    "atom-workspace": "substrate-plugin:toggle"
-  },
   "repository": "https://github.com/everstake/atom-plugin-substrate",
   "license": "Apache-2.0",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
+  },
+  "activationCommands": {
+    "atom-workspace": [
+      "substrate-plugin:toggle"
+    ]
   },
   "consumedServices": {
     "status-bar": {
@@ -25,26 +27,30 @@
       }
     }
   },
-  "scripts": {
-    "install": "tsc -p ./lib",
-    "build": "tsc -p ./lib",
-    "typecheck": "tsc --noEmit -p ./lib && tsc --noEmit -p ./spec",
-    "lint": "tslint --project ./lib && tslint --project ./spec",
-    "test": "yarn run typecheck && yarn run lint"
+  "atomTranspilers": [
+    {
+      "transpiler": "atom-ts-transpiler",
+      "glob": "{!(node_modules)/**/,}*.ts?(x)",
+      "options": {
+        "compilerOptions": {},
+        "cacheKeyFiles": [
+          "tsconfig.json"
+        ],
+        "verbose": false
+      }
+    }
+  ],
+  "prettier": {},
+  "dependencies": {
+    "atom-ts-transpiler": "^1.5.2",
+    "list": "^2.0.14",
+    "react": "^16.10.1",
+    "react-dom": "^16.10.1",
+    "typescript": "^3.0.3"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/atom": "^1.36.1",
-    "@types/chai": "^4.2.3",
-    "@types/jasmine": "^3.4.0",
-    "@types/jest": "^24.0.18",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.8",
-    "chai": "^4.2.0",
-    "jasmine": "^3.5.0",
-    "jest": "^24.9.0",
-    "tslint": "^5.20.0",
-    "typescript": "^3.6.3",
-    "typescript-tslint-plugin": "^0.5.4"
+    "@types/react": "^16.9.4",
+    "@types/react-dom": "^16.9.1"
   }
 }
