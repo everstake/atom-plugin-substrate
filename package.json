@@ -1,31 +1,20 @@
 {
   "name": "substrate-plugin",
+  "main": "./lib/index",
   "version": "0.1.0",
-  "main": "./dist/main",
-  "preferGlobal": true,
   "description": "Plugin for Parity Substrate",
-  "engines": {
-    "atom": ">=1.31.0 <2.0.0",
-    "node": "*"
-  },
-  "homepage": "https://github.com/everstake/atom-plugin-substrate",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/everstake/atom-plugin-substrate.git"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/everstake/atom-plugin-substrate/issues"
-  },
   "keywords": [
     "substrate",
-    "polkadot",
     "parity",
+    "polkadot",
     "web3",
     "everstake"
   ],
-  "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
-  "activationHooks": [],
+  "repository": "https://github.com/everstake/atom-plugin-substrate",
+  "license": "Apache-2.0",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
   "activationCommands": {
     "atom-workspace": [
       "substrate-plugin:toggle"
@@ -38,39 +27,30 @@
       }
     }
   },
-  "scripts": {
-    "build": "tsc -p ./lib",
-    "lint": "tslint --project ./lib && tslint --project ./spec",
-    "test": "npm run lint"
-  },
+  "atomTranspilers": [
+    {
+      "transpiler": "atom-ts-transpiler",
+      "glob": "{!(node_modules)/**/,}*.ts?(x)",
+      "options": {
+        "compilerOptions": {},
+        "cacheKeyFiles": [
+          "tsconfig.json"
+        ],
+        "verbose": false
+      }
+    }
+  ],
+  "prettier": {},
   "dependencies": {
-    "atom-highlight": "^0.4.2",
-    "atom-select-list": "^0.7.2",
-    "byline": "^5.0.0",
-    "etch": "^0.14.0",
-    "fs-plus": "^3.1.1",
-    "fuzzaldrin": "^2.1.0",
-    "lodash": "^4.17.11",
-    "resolve": "^1.10.0",
-    "tslib": "^1.9.3",
-    "typescript": "^3.3.4000"
+    "atom-ts-transpiler": "^1.5.2",
+    "list": "^2.0.14",
+    "react": "^16.10.1",
+    "react-dom": "^16.10.1",
+    "typescript": "^3.0.3"
   },
   "devDependencies": {
-    "@types/atom": "^1.31.1",
-    "@types/byline": "^4.2.31",
-    "@types/chai": "^4.1.7",
-    "@types/fs-plus": "^3.0.1",
-    "@types/fuzzaldrin": "^2.1.2",
-    "@types/lodash": "^4.14.123",
-    "@types/mocha": "^5",
-    "@types/node": "^8",
-    "@types/resolve": "^0.0.8",
-    "atom-ts-spec-runner": "^1.1.1",
-    "chai": "^4.2.0",
-    "prettier": "^1.16.4",
-    "ts-node": "^8.0.3",
-    "tslint": "^5.14.0",
-    "tslint-use-atom-disposables": "0.0.1",
-    "typescript-tslint-plugin": "0.3.1"
+    "@types/atom": "^1.36.1",
+    "@types/react": "^16.9.4",
+    "@types/react-dom": "^16.9.1"
   }
 }
