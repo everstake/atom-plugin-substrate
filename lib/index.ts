@@ -1,19 +1,19 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { CompositeDisposable, Disposable } from "atom";
+import { CompositeDisposable } from "atom";
+import * as path from "path";
 
 import { SidebarPanel, Props } from "./sidebar";
 
 type State = {};
 
 module.exports = new class SubstratePlugin {
-  public element: HTMLElement;
   public readonly getTitle = () => "Substrate";
   public readonly getAllowedLocations = () => ["right", "left"];
   public readonly getURI = () => "atom://substrate-plugin";
 
   private subscriptions = new CompositeDisposable();
-  private editorSubcription: Disposable | undefined;
+  public element: HTMLElement;
 
   constructor() {
     this.element = document.createElement("div");
@@ -26,7 +26,8 @@ module.exports = new class SubstratePlugin {
   public activate(_state: State) {
     this.subscriptions.add(
       atom.commands.add("atom-workspace", {
-        "substrate-plugin:toggle": () => this.toggle(),
+        "substrate-plugin:toggle": this.toggle,
+        "substrate-plugin:toggle-sidebar": this.toggleSidebar,
       })
     );
   }
@@ -42,26 +43,28 @@ module.exports = new class SubstratePlugin {
   public consumeStatusBar(statusBar: any) {
       const div = document.createElement("div");
       div.classList.add("inline-block");
-      const icon = document.createElement("span");
-      // Todo: Add icon
-      icon.textContent = "X Substrate";
+      div.classList.add("substrate-plugin-status-bar");
+
+      const pkgPath = atom.packages.getPackageDirPaths()[0];
+      const icon = document.createElement("img");
+      icon.src = path.join(pkgPath, "substrate-plugin", "assets", "icon.svg");
+
       const link = document.createElement("a");
       link.appendChild(icon);
-      link.onclick = (_e) => {
-        this.toggle();
+
+      div.appendChild(link);
+      div.onclick = (_e) => {
+        this.toggleSidebar();
       };
       atom.tooltips.add(div, { title: "Toggle Substrate plugin sidebar" });
-      div.appendChild(link);
       statusBar.addRightTile({ item: div, priority: 0 });
   }
 
-  private toggle() {
-    atom.workspace.toggle(this);
+  private async toggle() {}
 
-    this.editorSubcription && this.editorSubcription.dispose();
-    this.editorSubcription = atom.workspace.observeActiveTextEditor(editor => {
-      this.render({ editor });
-    });
+  private async toggleSidebar() {
+      await atom.workspace.toggle(this);
+      this.render({});
   }
 
   private render(props: Props) {

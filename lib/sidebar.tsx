@@ -1,9 +1,7 @@
 import * as React from "react";
-import { CompositeDisposable, TextEditor } from "atom";
+import { CompositeDisposable } from "atom";
 
-export type Props = {
-  editor: TextEditor | undefined;
-};
+export type Props = {};
 
 type State = {};
 
