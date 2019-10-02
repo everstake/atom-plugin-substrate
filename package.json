@@ -15,11 +15,6 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "activationCommands": {
-    "atom-workspace": [
-      "substrate-plugin:toggle"
-    ]
-  },
   "consumedServices": {
     "status-bar": {
       "versions": {
