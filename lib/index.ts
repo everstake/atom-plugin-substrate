@@ -9,6 +9,7 @@ type State = {};
 
 module.exports = new class SubstratePlugin {
   public readonly getTitle = () => "Substrate";
+  public readonly getIconName = () => "substrate-logo";
   public readonly getAllowedLocations = () => ["right", "left"];
   public readonly getURI = () => "atom://substrate-plugin";
 
