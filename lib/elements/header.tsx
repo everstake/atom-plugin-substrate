@@ -1,30 +1,33 @@
 import * as React from "react";
 import { CompositeDisposable } from "atom";
 
-export type Props = {};
+export type Props = {
+  changePanel: (newPanel: string) => void,
+};
 
 type State = {};
 
 export class HeaderPanel extends React.Component<Props, State> {
+  public state: State = {};
   private subscriptions = new CompositeDisposable();
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {} as State;
-  }
-
   public render(): JSX.Element {
+    const buttonValues = ["Nodes", "Accounts", "Extrinsics"];
+    const buttons = buttonValues.map(val => this.getButton(val));
     return (
       <div className="header">
-        <div className="button">
-          <span>Accounts</span>
-        </div>
-        <div className="button">
-          <span>Nodes</span>
-        </div>
-        <div className="button">
-          <span>Extrinsics</span>
-        </div>
+        {buttons}
+      </div>
+    );
+  }
+
+  private getButton(value: string) {
+    const onButtonClick = (event: React.MouseEvent) => {
+      this.props.changePanel(value);
+    };
+    return (
+      <div className="button" onClick={onButtonClick}>
+        <span>{value}</span>
       </div>
     );
   }

@@ -5,18 +5,14 @@ export type Props = {};
 
 type State = {};
 
-export class BodyPanel extends React.Component<Props, State> {
+export class NodesBodyPanel extends React.Component<Props, State> {
+  public state: State = {};
   private subscriptions = new CompositeDisposable();
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {} as State;
-  }
 
   public render(): JSX.Element {
     return (
-      <div className="body">
-        <span>Sidebar works!</span>
+      <div className="nodes">
+        <span>Nodes panel</span>
       </div>
     );
   }

@@ -5,22 +5,27 @@ import { BodyPanel } from "./body";
 
 export type Props = {};
 
-type State = {};
+type State = {
+  panel: string,
+};
 
 export class SidebarPanel extends React.Component<Props, State> {
+  public state: State = {
+    panel: "nodes",
+  };
   private subscriptions = new CompositeDisposable();
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {} as State;
-  }
 
   public render(): JSX.Element {
     return (
       <div className="substrate-plugin-sidebar">
-        <HeaderPanel />
-        <BodyPanel />
+        <HeaderPanel changePanel={this.onPanelChange.bind(this)} />
+        <BodyPanel panel={this.state.panel} />
       </div>
     );
+  }
+
+  private onPanelChange(newPanel: string) {
+    const panel = newPanel.toLowerCase();
+    this.setState({ panel });
   }
 }
