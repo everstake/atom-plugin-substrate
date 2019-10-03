@@ -8,11 +8,41 @@
   .substrate-plugin-sidebar {
     height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
 
-    p {
-      font-size: 20px;
+    .header {
+      flex: 1;
+      align-self: flex-start;
+      width: 100%;
+      display: flex;
+      border-bottom: 1px solid #181a1f;
+      color: #9da5b4;
+
+      .button {
+        flex: 1;
+        display: flex;
+        padding: 5px 10px;
+        justify-content: center;
+        align-items: center;
+        background-color: #21252b;
+        transition: background-color .3s linear;
+
+        &:hover {
+          background-color: #2a2f37;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .body {
+      flex: 17;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      span {
+        font-size: 20px;
+      }
     }
   }
 }

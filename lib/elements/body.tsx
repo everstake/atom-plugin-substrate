@@ -5,7 +5,7 @@ export type Props = {};
 
 type State = {};
 
-export class SidebarPanel extends React.Component<Props, State> {
+export class BodyPanel extends React.Component<Props, State> {
   private subscriptions = new CompositeDisposable();
 
   constructor(props: Props) {
@@ -15,8 +15,8 @@ export class SidebarPanel extends React.Component<Props, State> {
 
   public render(): JSX.Element {
     return (
-      <div className="substrate-plugin-sidebar">
-        <p>Sidebar works!</p>
+      <div className="body">
+        <span>Sidebar works!</span>
       </div>
     );
   }

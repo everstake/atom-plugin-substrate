@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import { CompositeDisposable } from "atom";
 import * as path from "path";
 
-import { SidebarPanel, Props } from "./sidebar";
+import { SidebarPanel, Props } from "./elements/sidebar";
 
 type State = {};
 
