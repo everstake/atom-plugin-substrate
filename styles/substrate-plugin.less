@@ -40,6 +40,121 @@
       justify-content: center;
       align-items: center;
 
+      .nodes {
+        flex: 1;
+        height: 100%;
+
+        .navbar {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          border-bottom: 1px solid #181a1f;
+          margin-bottom: 5px;
+
+          span {
+            margin: 5px 10px;
+            font-size: 12px;
+          }
+        }
+
+        ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+
+          .node {
+            padding: 5px 10px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            &:hover {
+              background-color: #2a2f37;
+            }
+
+            .icon {
+              margin: 0 10px;
+              width: 16px;
+              height: 16px;
+            }
+            .name {
+              flex: 1;
+              font-size: 12px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .url {
+              flex: 2;
+              font-size: 12px;
+              color: rgba(157, 165, 180, 0.6);
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+        }
+      }
+
+      .accounts {
+        flex: 1;
+        height: 100%;
+        width: 100%;
+
+        .navbar {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          border-bottom: 1px solid #181a1f;
+          margin-bottom: 5px;
+
+          span {
+            margin: 5px 10px;
+            font-size: 12px;
+          }
+        }
+
+        ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0;
+
+          .account {
+            padding: 5px 10px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            &:hover {
+              background-color: #2a2f37;
+            }
+
+            .icon {
+              margin: 0 10px;
+              width: 16px;
+              height: 16px;
+            }
+            .name {
+              flex: 1;
+              font-size: 12px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .hash {
+              flex: 3;
+              font-size: 12px;
+              color: rgba(157, 165, 180, 0.6);
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+        }
+      }
+
       span {
         font-size: 20px;
       }

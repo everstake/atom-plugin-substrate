@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { CompositeDisposable } from "atom";
-import * as path from "path";
+import * as Path from "path";
 
 import { SidebarPanel, Props } from "./elements/sidebar";
 
@@ -25,12 +25,15 @@ module.exports = new class SubstratePlugin {
   }
 
   public activate(_state: State) {
-    this.subscriptions.add(
-      atom.commands.add("atom-workspace", {
-        "substrate-plugin:toggle": this.toggle,
-        "substrate-plugin:toggle-sidebar": this.toggleSidebar,
-      })
-    );
+    if (atom.inDevMode()) {
+      try {
+        this.activatePlugin();
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      this.activatePlugin();
+    }
   }
 
   public deactivate() {
@@ -48,7 +51,7 @@ module.exports = new class SubstratePlugin {
 
       const pkgPath = atom.packages.getPackageDirPaths()[0];
       const icon = document.createElement("img");
-      icon.src = path.join(pkgPath, "substrate-plugin", "assets", "icon.svg");
+      icon.src = Path.join(pkgPath, "substrate-plugin", "assets", "icon.svg");
 
       const link = document.createElement("a");
       link.appendChild(icon);
@@ -61,11 +64,20 @@ module.exports = new class SubstratePlugin {
       statusBar.addRightTile({ item: div, priority: 0 });
   }
 
+  private async activatePlugin() {
+    this.subscriptions.add(
+      atom.commands.add("atom-workspace", {
+        "substrate-plugin:toggle": this.toggle,
+        "substrate-plugin:toggle-sidebar": this.toggleSidebar,
+      })
+    );
+  }
+
   private async toggle() {}
 
   private async toggleSidebar() {
-      await atom.workspace.toggle(this);
-      this.render({});
+    await atom.workspace.toggle(this);
+    this.render({});
   }
 
   private render(props: Props) {

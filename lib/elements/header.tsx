@@ -13,7 +13,7 @@ export class HeaderPanel extends React.Component<Props, State> {
 
   public render(): JSX.Element {
     const buttonValues = ["Nodes", "Accounts", "Extrinsics"];
-    const buttons = buttonValues.map(val => this.getButton(val));
+    const buttons = buttonValues.map((val, index) => this.getButton(index, val));
     return (
       <div className="header">
         {buttons}
@@ -21,12 +21,12 @@ export class HeaderPanel extends React.Component<Props, State> {
     );
   }
 
-  private getButton(value: string) {
+  private getButton(index: number, value: string) {
     const onButtonClick = (event: React.MouseEvent) => {
       this.props.changePanel(value);
     };
     return (
-      <div className="button" onClick={onButtonClick}>
+      <div key={index} className="button" onClick={onButtonClick}>
         <span>{value}</span>
       </div>
     );
