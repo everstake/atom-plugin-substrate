@@ -49,7 +49,7 @@
   dependencies:
     "@babel/runtime" "^7.6.2"
 
-"@polkadot/keyring@^1.5.1":
+"@polkadot/keyring@^1.4.1", "@polkadot/keyring@^1.5.1":
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/@polkadot/keyring/-/keyring-1.5.1.tgz#74091e246c9ce4bc15960f15afffdb3bb8e208c7"
   integrity sha512-sp1uNK5FKs8Vnlvl/0NvlRZfu4KcCWtyIL6YFa3oH1iYnAmwEV+XekQwTNe4wXWJVXdjLi1Xvjxx2yGxQkWolw==

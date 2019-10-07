@@ -5,7 +5,9 @@ import * as Path from "path";
 
 import { SidebarPanel, Props } from "./elements/sidebar";
 
-type State = {};
+type State = {
+  props: Props,
+};
 
 module.exports = new class SubstratePlugin {
   public readonly getTitle = () => "Substrate";
@@ -14,25 +16,27 @@ module.exports = new class SubstratePlugin {
   public readonly getURI = () => "atom://substrate-plugin";
 
   private subscriptions = new CompositeDisposable();
+  private props: Props;
   public element: HTMLElement;
 
   constructor() {
     this.element = document.createElement("div");
     this.element.classList.add("substrate-plugin");
-    this.render({
-      editor: undefined,
-    });
+    this.props = {
+      accounts: [],
+    };
+    this.render();
   }
 
-  public activate(_state: State) {
+  public activate(state?: State) {
     if (atom.inDevMode()) {
       try {
-        this.activatePlugin();
+        this.activatePlugin(state);
       } catch (err) {
         console.log(err);
       }
     } else {
-      this.activatePlugin();
+      this.activatePlugin(state);
     }
   }
 
@@ -40,8 +44,8 @@ module.exports = new class SubstratePlugin {
     this.subscriptions.dispose();
   }
 
-  public serialize(): State {
-    return {};
+  public serialize(): Props {
+    return this.props;
   }
 
   public consumeStatusBar(statusBar: any) {
@@ -64,23 +68,26 @@ module.exports = new class SubstratePlugin {
       statusBar.addRightTile({ item: div, priority: 0 });
   }
 
-  private async activatePlugin() {
+  private async activatePlugin(state?: State) {
     this.subscriptions.add(
       atom.commands.add("atom-workspace", {
         "substrate-plugin:toggle": this.toggle,
         "substrate-plugin:toggle-sidebar": this.toggleSidebar,
       })
     );
+    if (state) {
+      this.props = state.props;
+    }
   }
 
   private async toggle() {}
 
   private async toggleSidebar() {
     await atom.workspace.toggle(this);
-    this.render({});
+    this.render();
   }
 
-  private render(props: Props) {
-    ReactDOM.render(React.createElement(SidebarPanel, props), this.element);
+  private render() {
+    ReactDOM.render(React.createElement(SidebarPanel, this.props), this.element);
   }
 }

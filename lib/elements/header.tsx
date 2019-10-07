@@ -11,7 +11,7 @@ type State = {
 
 export class HeaderPanel extends React.Component<Props, State> {
   public state: State = {
-    active: "",
+    active: "Nodes",
   };
   private subscriptions = new CompositeDisposable();
 
@@ -30,7 +30,7 @@ export class HeaderPanel extends React.Component<Props, State> {
       this.props.changePanel(value);
       this.setState({ active: value });
     };
-    const isActive = this.state.active === value.toLowerCase() ? "active" : "";
+    const isActive = this.state.active === value ? "active" : "";
     const className = `button ${isActive}`
     return (
       <div key={index} className={className} onClick={onButtonClick}>
