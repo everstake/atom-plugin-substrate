@@ -6,8 +6,12 @@
 				label: 'Substrate plugin'
 				submenu: [
 					{
-						label: 'Toggle substrate-plugin'
+						label: 'Toggle plugin'
 						command: 'substrate-plugin:toggle'
+					}
+					{
+						label: 'Toggle sidebar'
+						command: 'substrate-plugin:toggle-sidebar'
 					}
 				]
 			}

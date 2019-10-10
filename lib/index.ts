@@ -1,70 +1,93 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { CompositeDisposable, Disposable } from "atom";
+import { CompositeDisposable } from "atom";
+import * as Path from "path";
 
-import { SidebarPanel, Props } from "./sidebar";
+import { SidebarPanel, Props } from "./elements/sidebar";
 
-type State = {};
+type State = {
+  props: Props,
+};
 
 module.exports = new class SubstratePlugin {
-  public element: HTMLElement;
   public readonly getTitle = () => "Substrate";
+  public readonly getIconName = () => "substrate-logo";
   public readonly getAllowedLocations = () => ["right", "left"];
   public readonly getURI = () => "atom://substrate-plugin";
 
   private subscriptions = new CompositeDisposable();
-  private editorSubcription: Disposable | undefined;
+  private props: Props;
+  public element: HTMLElement;
 
   constructor() {
     this.element = document.createElement("div");
     this.element.classList.add("substrate-plugin");
-    this.render({
-      editor: undefined,
-    });
+    this.props = {
+      accounts: [],
+    };
+    this.render();
   }
 
-  public activate(_state: State) {
-    this.subscriptions.add(
-      atom.commands.add("atom-workspace", {
-        "substrate-plugin:toggle": () => this.toggle(),
-      })
-    );
+  public activate(state?: State) {
+    if (atom.inDevMode()) {
+      try {
+        this.activatePlugin(state);
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      this.activatePlugin(state);
+    }
   }
 
   public deactivate() {
     this.subscriptions.dispose();
   }
 
-  public serialize(): State {
-    return {};
+  public serialize(): Props {
+    return this.props;
   }
 
   public consumeStatusBar(statusBar: any) {
       const div = document.createElement("div");
       div.classList.add("inline-block");
-      const icon = document.createElement("span");
-      // Todo: Add icon
-      icon.textContent = "X Substrate";
+      div.classList.add("substrate-plugin-status-bar");
+
+      const pkgPath = atom.packages.getPackageDirPaths()[0];
+      const icon = document.createElement("img");
+      icon.src = Path.join(pkgPath, "substrate-plugin", "assets", "icon.svg");
+
       const link = document.createElement("a");
       link.appendChild(icon);
-      link.onclick = (_e) => {
-        this.toggle();
+
+      div.appendChild(link);
+      div.onclick = (_e) => {
+        this.toggleSidebar();
       };
       atom.tooltips.add(div, { title: "Toggle Substrate plugin sidebar" });
-      div.appendChild(link);
       statusBar.addRightTile({ item: div, priority: 0 });
   }
 
-  private toggle() {
-    atom.workspace.toggle(this);
-
-    this.editorSubcription && this.editorSubcription.dispose();
-    this.editorSubcription = atom.workspace.observeActiveTextEditor(editor => {
-      this.render({ editor });
-    });
+  private async activatePlugin(state?: State) {
+    this.subscriptions.add(
+      atom.commands.add("atom-workspace", {
+        "substrate-plugin:toggle": this.toggle,
+        "substrate-plugin:toggle-sidebar": this.toggleSidebar,
+      })
+    );
+    if (state) {
+      this.props = state.props;
+    }
   }
 
-  private render(props: Props) {
-    ReactDOM.render(React.createElement(SidebarPanel, props), this.element);
+  private async toggle() {}
+
+  private async toggleSidebar() {
+    await atom.workspace.toggle(this);
+    this.render();
+  }
+
+  private render() {
+    ReactDOM.render(React.createElement(SidebarPanel, this.props), this.element);
   }
 }

@@ -15,11 +15,6 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "activationCommands": {
-    "atom-workspace": [
-      "substrate-plugin:toggle"
-    ]
-  },
   "consumedServices": {
     "status-bar": {
       "versions": {
@@ -42,6 +37,8 @@
   ],
   "prettier": {},
   "dependencies": {
+    "@polkadot/api": "^0.94.0-beta.8",
+    "@polkadot/keyring": "^1.4.1",
     "atom-ts-transpiler": "^1.5.2",
     "list": "^2.0.14",
     "react": "^16.10.1",
@@ -50,6 +47,7 @@
   },
   "devDependencies": {
     "@types/atom": "^1.36.1",
+    "@types/electron": "^1.6.10",
     "@types/react": "^16.9.4",
     "@types/react-dom": "^16.9.1"
   }
