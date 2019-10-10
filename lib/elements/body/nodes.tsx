@@ -24,13 +24,10 @@ export class NodesBodyPanel extends React.Component<Props, State> {
 
   public render(): JSX.Element {
     return (
-      <div className="nodes">
-        <NavbarComponent title="My node connections" menu={this.state.menu} />
-        <ul>
-          <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
-          <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />
-        </ul>
-      </div>
+      <ul className="nodes">
+        <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
+        <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />
+      </ul>
     );
   }
 

@@ -11,9 +11,7 @@ export class ExtrinsicsBodyPanel extends React.Component<Props, State> {
 
   public render(): JSX.Element {
     return (
-      <div className="extrinsics">
-        <span>Extrinsics panel</span>
-      </div>
+      <ul className="extrinsics"></ul>
     );
   }
 }
