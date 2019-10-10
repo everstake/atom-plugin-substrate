@@ -2,6 +2,7 @@ import * as React from "react";
 import { CompositeDisposable } from "atom";
 import { HeaderPanel } from "./header";
 import { BodyPanel } from "./body";
+import { AccordionPanel } from "./accordion";
 
 export type Props = {};
 
@@ -18,8 +19,7 @@ export class SidebarPanel extends React.Component<Props, State> {
   public render(): JSX.Element {
     return (
       <div className="substrate-plugin-sidebar">
-        <HeaderPanel changePanel={this.onPanelChange.bind(this)} />
-        <BodyPanel panel={this.state.panel} />
+        <AccordionPanel changePanel={this.onPanelChange.bind(this)} panel={this.state.panel} />
       </div>
     );
   }
