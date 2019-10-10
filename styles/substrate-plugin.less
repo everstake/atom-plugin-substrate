@@ -20,10 +20,15 @@
     .buttons {
       height: 100%;
       border-left: 1px solid #181a1f;
-
       .button {
         padding: 5px 10px;
         cursor: pointer;
+        font-size: 0;
+        line-height: inherit;
+        &:before {
+          content: '• • •';
+          font-size: 11px;
+        }
       }
     }
   }
@@ -32,6 +37,10 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
+
+    .tab-label {
+      border: 1px solid red;
+    }
 
     .header {
       align-self: flex-start;
@@ -168,9 +177,12 @@
 
           .input {
             margin-bottom: 10px;
+            display: flex;
 
             span {
               padding: 5px 10px;
+              min-width: 55px;
+              display: block;
             }
             input {
               width: auto;
