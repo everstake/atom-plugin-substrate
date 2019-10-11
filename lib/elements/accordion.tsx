@@ -9,19 +9,34 @@ export type Props = {
   changePanel: (newPanel: string) => void,
 };
 
+type Panel = {
+  title: string,
+  closed: boolean,
+};
+
 type State = {
-  active: string,
+  panels: Panel[],
 };
 
 export class AccordionPanel extends React.Component<Props, State> {
   public state: State = {
-    active: "nodes",
+    panels: [{
+      title: "nodes",
+      closed: false,
+    }, {
+      title: "accounts",
+      closed: false,
+    }, {
+      title: "extrinsics",
+      closed: false,
+    }],
   };
   private subscriptions = new CompositeDisposable();
 
   public render(): JSX.Element {
-    const buttonValues = ["nodes", "accounts", "extrinsics"];
-    const buttons = buttonValues.map((val, index) => this.getTab(index, val));
+    const buttons = this.state.panels.map(
+      (val, index) => this.getTab(index, val),
+    );
     return (
       <div className="accordion">
         {buttons}
@@ -29,18 +44,22 @@ export class AccordionPanel extends React.Component<Props, State> {
     );
   }
 
-  private getTab(index: number, value: string) {
+  private getTab(index: number, val: Panel) {
     const onButtonClick = (_event: React.MouseEvent) => {
-      this.props.changePanel(value);
-      this.setState({ active: value });
+      this.props.changePanel(val.title);
+      const panels = this.state.panels;
+      panels[index].closed = !panels[index].closed;
+      this.setState({ panels });
     };
-    const isActive = this.state.active === value ? "active" : "";
-    const className = `tab-label ${isActive}`;
-    const panelName = this.getBodyPanelName(value);
-    const panel = this.getBodyPanel(value);
+    const isClosed = val.closed ? "closed" : "";
+    const className = `tab ${isClosed}`;
+    const panelName = this.getBodyPanelName(val.title);
+    const panel = this.getBodyPanel(val.title);
     return (
-      <div key={index} className="tab">
-        <div className={className} onClick={onButtonClick}>{panelName}</div>
+      <div key={index} className={className}>
+        <div className="tab-label" onClick={onButtonClick}>
+          <span>{panelName}</span>
+        </div>
         <div className="tab-content">{panel}</div>
       </div>
     );
