@@ -1,14 +1,12 @@
 import { createStore, combineReducers } from "redux";
 
-import * as systems from "./systems";
+import { tabs } from "./modules";
 
-const systemReducers = Object.keys(systems).map((key, _) => {
-  const system = (systems as any)[key];
-  console.log(systems);
-  return system.reducer;
-});
+const systemReducers = {
+  tabs: tabs.reducers.reducer,
+};
 
-const rootReducer = combineReducers(systemReducers as any);
+const rootReducer = combineReducers(systemReducers);
 
 export type AppState = ReturnType<typeof rootReducer>;
 
