@@ -9,7 +9,7 @@ export type Props = {
 
 type State = {};
 
-export class NavbarComponent extends React.Component<Props, State> {
+export class TabComponent extends React.Component<Props, State> {
   public state: State = {};
   private subscriptions = new CompositeDisposable();
 

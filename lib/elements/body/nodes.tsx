@@ -2,7 +2,7 @@ import * as React from "react";
 import { CompositeDisposable } from "atom";
 import { Menu as MenuType, remote } from "electron";
 
-import { NavbarComponent, NodeComponent } from "../../components";
+import { NodeComponent } from "../../components/nodes";
 
 const { Menu, MenuItem } = remote;
 

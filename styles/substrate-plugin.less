@@ -45,19 +45,23 @@
 
       .tab-label {
         display: flex;
-        padding: 5px 10px;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
+        padding: 5px 10px;
         background-color: #2a2f37;
         transition: background-color .3s linear;
         cursor: pointer;
         user-select: none;
-      }
-      & .tab-label span:before {
-        content: '▼';
-        display: inline-block;
-        transform: rotate(0deg);
-        margin-right: 10px;
+
+        .actions {
+          font-size: 6px;
+        }
+        span:before {
+          content: '▼';
+          display: inline-block;
+          transform: rotate(0deg);
+          margin-right: 10px;
+        }
       }
       &.closed {
         & .tab-label span:before {

@@ -12,6 +12,7 @@ export type Props = {
 type Panel = {
   title: string,
   closed: boolean,
+  component: JSX.Element,
 };
 
 type State = {
@@ -23,12 +24,15 @@ export class AccordionPanel extends React.Component<Props, State> {
     panels: [{
       title: "nodes",
       closed: false,
+      component: <NodesBodyPanel />,
     }, {
       title: "accounts",
       closed: false,
+      component: <AccountsBodyPanel />,
     }, {
       title: "extrinsics",
       closed: false,
+      component: <ExtrinsicsBodyPanel />,
     }],
   };
   private subscriptions = new CompositeDisposable();
@@ -54,13 +58,13 @@ export class AccordionPanel extends React.Component<Props, State> {
     const isClosed = val.closed ? "closed" : "";
     const className = `tab ${isClosed}`;
     const panelName = this.getBodyPanelName(val.title);
-    const panel = this.getBodyPanel(val.title);
     return (
       <div key={index} className={className}>
         <div className="tab-label" onClick={onButtonClick}>
           <span>{panelName}</span>
+          <div className="actions" onClick={onButtonClick}>• • •</div>
         </div>
-        <div className="tab-content">{panel}</div>
+        <div className="tab-content">{val.component}</div>
       </div>
     );
   }
@@ -75,17 +79,5 @@ export class AccordionPanel extends React.Component<Props, State> {
         return "Available extrinsics";
     }
     return "Invalid panel name";
-  }
-
-  private getBodyPanel(value: string) {
-    switch (value) {
-      case "nodes":
-        return <NodesBodyPanel />;
-      case "accounts":
-        return <AccountsBodyPanel />;
-      case "extrinsics":
-        return <ExtrinsicsBodyPanel />;
-    }
-    return <span>Invalid panel!</span>;
   }
 }

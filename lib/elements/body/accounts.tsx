@@ -4,7 +4,7 @@ import { Menu as MenuType, remote } from "electron";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 
-import { AccountComponent } from "../../components";
+import { AccountComponent } from "../../components/accounts";
 
 const { Menu, MenuItem } = remote;
 
