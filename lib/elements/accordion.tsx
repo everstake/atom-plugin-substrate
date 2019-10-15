@@ -2,18 +2,16 @@ import * as React from "react";
 import { CompositeDisposable } from "atom";
 import { connect } from "react-redux";
 
-import { AccountsBodyPanel } from "./body/accounts";
-import { ExtrinsicsBodyPanel } from "./body/extrinsics";
-import { NodesBodyPanel } from "./body/nodes";
-
+import AccountsBodyPanel from "./body/accounts";
+import ExtrinsicsBodyPanel from "./body/extrinsics";
+import NodesBodyPanel from "./body/nodes";
 import { AppState } from "../store";
-import { TabsState, PanelType } from "../store/modules/tabs/types";
-import { setPanels, togglePanel } from "../store/modules/tabs/actions";
+import { TabsState } from "../store/modules/tabs/types";
+import { setPanels } from "../store/modules/tabs/actions";
 
 export type Props = {
   tabs: TabsState,
   setPanels: typeof setPanels,
-  togglePanel: typeof togglePanel,
 };
 
 type State = {};
@@ -41,27 +39,13 @@ class AccordionPanel extends React.Component<Props, State> {
   }
 
   public render(): JSX.Element {
-    const buttons = this.props.tabs.panels.map((val) => this.getTab(val.id, val));
+    const panels = this.props.tabs.panels;
+    const tabs = panels.map((val) => {
+      return val.component({ key: val.id, id: val.id });
+    });
     return (
       <div className="accordion">
-        {buttons}
-      </div>
-    );
-  }
-
-  private getTab(index: number, val: PanelType) {
-    const onButtonClick = (_event: React.MouseEvent) => {
-      this.props.togglePanel(index);
-    };
-    const isClosed = val.closed ? "closed" : "";
-    const className = `tab ${isClosed}`;
-    return (
-      <div key={index} className={className}>
-        <div className="tab-label" onClick={onButtonClick}>
-          <span>{val.title}</span>
-          <div className="actions" onClick={console.log}>• • •</div>
-        </div>
-        <div className="tab-content">{val.component({})}</div>
+        {tabs}
       </div>
     );
   }
@@ -73,5 +57,5 @@ const mapStateToProps = (state: AppState) => ({
 
 export default connect(
   mapStateToProps,
-  { setPanels, togglePanel }
+  { setPanels }
 )(AccordionPanel);

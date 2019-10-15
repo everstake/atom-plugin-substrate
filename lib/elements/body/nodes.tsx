@@ -1,18 +1,26 @@
 import * as React from "react";
 import { CompositeDisposable } from "atom";
 import { Menu as MenuType, remote } from "electron";
+import { connect } from "react-redux";
 
 import { NodeComponent } from "../../components/nodes";
+import { AppState } from "../../store";
+import { TabsState } from "../../store/modules/tabs/types";
+import { togglePanel } from "../../store/modules/tabs/actions";
 
 const { Menu, MenuItem } = remote;
 
-export type Props = {};
+export type Props = {
+  id: number,
+  tabs: TabsState,
+  togglePanel: typeof togglePanel,
+};
 
 type State = {
   menu: MenuType,
 };
 
-export class NodesBodyPanel extends React.Component<Props, State> {
+class NodesBodyPanel extends React.Component<Props, State> {
   public state: State = {
     menu: new Menu(),
   };
@@ -23,11 +31,30 @@ export class NodesBodyPanel extends React.Component<Props, State> {
   }
 
   public render(): JSX.Element {
+    const val = this.props.tabs.panels.find(
+      (value) => value.id === this.props.id,
+    );
+    if (!val) {
+      return <span>Invalid tabs</span>;
+    }
+    const onButtonClick = (_event: React.MouseEvent) => {
+      this.props.togglePanel(val.id);
+    };
+    const isClosed = val.closed ? "closed" : "";
+    const className = `tab ${isClosed}`;
     return (
-      <ul className="nodes">
-        <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
-        <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />
-      </ul>
+      <div className={className}>
+        <div className="tab-label" onClick={onButtonClick}>
+          <span>{val.title}</span>
+          <div className="actions" onClick={console.log}>• • •</div>
+        </div>
+        <div className="tab-content">
+          <ul className="nodes">
+            <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
+            <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />
+          </ul>
+        </div>
+      </div>
     );
   }
 
@@ -66,3 +93,12 @@ export class NodesBodyPanel extends React.Component<Props, State> {
     this.setState({ menu });
   }
 }
+
+const mapStateToProps = (state: AppState) => ({
+  tabs: state.tabs,
+});
+
+export default connect(
+  mapStateToProps,
+  { togglePanel }
+)(NodesBodyPanel);
