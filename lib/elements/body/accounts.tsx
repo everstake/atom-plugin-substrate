@@ -49,12 +49,6 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const onTabClick = (_: React.MouseEvent) => {
-      this.props.togglePanel(val.id);
-    };
-    const onActionsClick = (_: React.MouseEvent) => {
-      this.props.togglePanel(val.id);
-    };
     const accounts = this.state.accounts.map(({ address, meta }: KeyringPair$Json, index: number) => {
       return <AccountComponent key={index} name={meta.name} hash={address} />;
     });
@@ -63,8 +57,8 @@ class AccountsBodyPanel extends React.Component<Props, State> {
         className="accounts"
         panel={val}
         menu={this.state.menu}
-        onTabClick={onTabClick}
-        onActionsClick={onActionsClick}
+        onTabClick={() => this.props.togglePanel(val.id)}
+        onActionsClick={() => this.state.menu.popup({})}
       >
         {accounts}
       </TabComponent>

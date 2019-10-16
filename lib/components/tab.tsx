@@ -22,8 +22,8 @@ export class TabComponent extends React.Component<Props, State> {
     const className = `tab ${isClosed}`;
     return (
       <div className={className}>
-        <div className="tab-label" onClick={this.props.onTabClick}>
-          <span>{val.title}</span>
+        <div className="tab-label">
+          <span onClick={this.props.onTabClick}>{val.title}</span>
           <div className="actions" onClick={this.props.onActionsClick}>• • •</div>
         </div>
         <div className="tab-content">

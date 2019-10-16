@@ -47,15 +47,21 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 5px 10px;
         min-height: 24px;
         background-color: #2a2f37;
         transition: background-color .3s linear;
-        cursor: pointer;
         user-select: none;
 
         .actions {
+          cursor: pointer;
           font-size: 6px;
+          width: 30px;
+          padding: 5px 10px 5px 0;
+        }
+        span {
+          cursor: pointer;
+          width: 100%;
+          padding: 5px 0 5px 10px;
         }
         span:before {
           content: '▼';

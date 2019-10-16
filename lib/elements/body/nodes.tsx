@@ -36,19 +36,13 @@ class NodesBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const onTabClick = (_: React.MouseEvent) => {
-      this.props.togglePanel(val.id);
-    };
-    const onActionsClick = (_: React.MouseEvent) => {
-      this.props.togglePanel(val.id);
-    };
     return (
       <TabComponent
         className="nodes"
         panel={val}
         menu={this.state.menu}
-        onTabClick={onTabClick}
-        onActionsClick={onActionsClick}
+        onTabClick={() => this.props.togglePanel(val.id)}
+        onActionsClick={() => this.state.menu.popup({})}
       >
         <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
         <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />

@@ -35,19 +35,13 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const onTabClick = (_: React.MouseEvent) => {
-      this.props.togglePanel(val.id);
-    };
-    const onActionsClick = (_: React.MouseEvent) => {
-      this.props.togglePanel(val.id);
-    };
     return (
       <TabComponent
         className="accoextrinsicsunts"
         panel={val}
         menu={this.state.menu}
-        onTabClick={onTabClick}
-        onActionsClick={onActionsClick}
+        onTabClick={() => this.props.togglePanel(val.id)}
+        onActionsClick={() => this.state.menu.popup({})}
       >
       </TabComponent>
     );
