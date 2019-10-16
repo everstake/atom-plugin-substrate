@@ -1,11 +1,11 @@
 import * as React from "react";
-import { CompositeDisposable } from "atom";
 import { Menu as MenuType, remote } from "electron";
 import { connect } from "react-redux";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 import { AccountComponent } from "../../components/accounts";
+import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
@@ -37,7 +37,6 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     accountInput: { name: "", key: "" },
     accounts: [],
   };
-  private subscriptions = new CompositeDisposable();
 
   componentDidMount() {
     this.initMenu();
@@ -50,24 +49,25 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const onButtonClick = (_event: React.MouseEvent) => {
+    const onTabClick = (_: React.MouseEvent) => {
       this.props.togglePanel(val.id);
     };
-    const isClosed = val.closed ? "closed" : "";
-    const className = `tab ${isClosed}`;
+    const onActionsClick = (_: React.MouseEvent) => {
+      this.props.togglePanel(val.id);
+    };
     const accounts = this.state.accounts.map(({ address, meta }: KeyringPair$Json, index: number) => {
       return <AccountComponent key={index} name={meta.name} hash={address} />;
     });
     return (
-      <div className={className}>
-        <div className="tab-label" onClick={onButtonClick}>
-          <span>{val.title}</span>
-          <div className="actions" onClick={console.log}>• • •</div>
-        </div>
-        <div className="tab-content">
-          <ul className="accounts">{accounts}</ul>
-        </div>
-      </div>
+      <TabComponent
+        className="accounts"
+        panel={val}
+        menu={this.state.menu}
+        onTabClick={onTabClick}
+        onActionsClick={onActionsClick}
+      >
+        {accounts}
+      </TabComponent>
     );
   }
 

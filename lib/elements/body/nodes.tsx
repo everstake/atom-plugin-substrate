@@ -1,9 +1,9 @@
 import * as React from "react";
-import { CompositeDisposable } from "atom";
 import { Menu as MenuType, remote } from "electron";
 import { connect } from "react-redux";
 
 import { NodeComponent } from "../../components/nodes";
+import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
@@ -24,7 +24,6 @@ class NodesBodyPanel extends React.Component<Props, State> {
   public state: State = {
     menu: new Menu(),
   };
-  private subscriptions = new CompositeDisposable();
 
   componentDidMount() {
     this.initMenu();
@@ -37,24 +36,23 @@ class NodesBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const onButtonClick = (_event: React.MouseEvent) => {
+    const onTabClick = (_: React.MouseEvent) => {
       this.props.togglePanel(val.id);
     };
-    const isClosed = val.closed ? "closed" : "";
-    const className = `tab ${isClosed}`;
+    const onActionsClick = (_: React.MouseEvent) => {
+      this.props.togglePanel(val.id);
+    };
     return (
-      <div className={className}>
-        <div className="tab-label" onClick={onButtonClick}>
-          <span>{val.title}</span>
-          <div className="actions" onClick={console.log}>• • •</div>
-        </div>
-        <div className="tab-content">
-          <ul className="nodes">
-            <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
-            <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />
-          </ul>
-        </div>
-      </div>
+      <TabComponent
+        className="nodes"
+        panel={val}
+        menu={this.state.menu}
+        onTabClick={onTabClick}
+        onActionsClick={onActionsClick}
+      >
+        <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
+        <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />
+      </TabComponent>
     );
   }
 

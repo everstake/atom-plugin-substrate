@@ -1,10 +1,10 @@
 import * as React from "react";
-import { CompositeDisposable } from "atom";
 import { Menu as MenuType, remote } from "electron";
 import { connect } from "react-redux";
 
+import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
-import { TabsState, PanelType } from "../../store/modules/tabs/types";
+import { TabsState } from "../../store/modules/tabs/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
 
 const { Menu, MenuItem } = remote;
@@ -23,7 +23,6 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
   public state: State = {
     menu: new Menu(),
   };
-  private subscriptions = new CompositeDisposable();
 
   componentDidMount() {
     this.initMenu();
@@ -36,21 +35,21 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const onButtonClick = (_event: React.MouseEvent) => {
+    const onTabClick = (_: React.MouseEvent) => {
       this.props.togglePanel(val.id);
     };
-    const isClosed = val.closed ? "closed" : "";
-    const className = `tab ${isClosed}`;
+    const onActionsClick = (_: React.MouseEvent) => {
+      this.props.togglePanel(val.id);
+    };
     return (
-      <div className={className}>
-        <div className="tab-label" onClick={onButtonClick}>
-          <span>{val.title}</span>
-          <div className="actions" onClick={console.log}>• • •</div>
-        </div>
-        <div className="tab-content">
-          <ul className="extrinsics"></ul>
-        </div>
-      </div>
+      <TabComponent
+        className="accoextrinsicsunts"
+        panel={val}
+        menu={this.state.menu}
+        onTabClick={onTabClick}
+        onActionsClick={onActionsClick}
+      >
+      </TabComponent>
     );
   }
 

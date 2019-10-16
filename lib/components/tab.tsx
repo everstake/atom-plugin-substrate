@@ -1,33 +1,37 @@
 import * as React from "react";
-import { CompositeDisposable } from "atom";
-import { Menu, remote } from "electron";
+import { Menu } from "electron";
+
+import { PanelType } from "../store/modules/tabs/types";
 
 export type Props = {
-  title: string,
+  className: string,
+  panel: PanelType,
   menu: Menu,
+  onTabClick: (event: React.MouseEvent) => void,
+  onActionsClick: (event: React.MouseEvent) => void,
 };
 
 type State = {};
 
 export class TabComponent extends React.Component<Props, State> {
   public state: State = {};
-  private subscriptions = new CompositeDisposable();
 
   public render(): JSX.Element {
+    const val = this.props.panel;
+    const isClosed = val.closed ? "closed" : "";
+    const className = `tab ${isClosed}`;
     return (
-      <div className="navbar">
-        <span className="title">{this.props.title}</span>
-        <div className="buttons">
-          <div className="button" onClick={this.showActionsMenu.bind(this)}>...</div>
+      <div className={className}>
+        <div className="tab-label" onClick={this.props.onTabClick}>
+          <span>{val.title}</span>
+          <div className="actions" onClick={this.props.onActionsClick}>• • •</div>
+        </div>
+        <div className="tab-content">
+          <ul className={this.props.className}>
+            {this.props.children}
+          </ul>
         </div>
       </div>
     );
-  }
-
-  private showActionsMenu(event: any) {
-    event.preventDefault();
-    this.props.menu.popup({
-      window: remote.getCurrentWindow(),
-    });
   }
 }

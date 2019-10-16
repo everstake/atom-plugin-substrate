@@ -1,5 +1,4 @@
 import * as React from "react";
-import { CompositeDisposable } from "atom";
 import { connect } from "react-redux";
 
 import AccountsBodyPanel from "./body/accounts";
@@ -17,8 +16,6 @@ export type Props = {
 type State = {};
 
 class AccordionPanel extends React.Component<Props, State> {
-  private subscriptions = new CompositeDisposable();
-
   componentDidMount() {
     this.props.setPanels([{
       id: 0,
