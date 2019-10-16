@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Menu as MenuType, remote } from "electron";
+import * as ReactDOM from "react-dom";
+import { Panel } from "atom";
+import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
@@ -12,7 +14,15 @@ import { togglePanel } from "../../store/modules/tabs/actions";
 
 const { Menu, MenuItem } = remote;
 
-type Account = { name: string, key: string };
+interface Account {
+  name: string;
+  key: string;
+};
+
+interface MenuItem {
+  item: MenuItemConstructorOptions,
+  modal: Panel;
+};
 
 export type Props = {
   id: number,
@@ -22,6 +32,7 @@ export type Props = {
 
 type State = {
   menu: MenuType,
+  menuItems: MenuItem[],
   keyring: Keyring,
 
   // Todo: Move to redux storage
@@ -32,6 +43,7 @@ type State = {
 class AccountsBodyPanel extends React.Component<Props, State> {
   public state: State = {
     menu: new Menu(),
+    menuItems: [],
     keyring: new Keyring({ type: "sr25519" }),
 
     accountInput: { name: "", key: "" },
@@ -39,7 +51,8 @@ class AccountsBodyPanel extends React.Component<Props, State> {
   };
 
   componentDidMount() {
-    this.initMenu();
+    const menuItems = this.initMenuItems();
+    this.initMenu(menuItems);
   }
 
   public render(): JSX.Element {
@@ -65,19 +78,56 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     );
   }
 
-  private initMenu() {
+  private initMenuItems(): MenuItem[] {
+    const menuItems = [];
+    const tmp = document.createElement("div");
+    ReactDOM.render(React.createElement(()=><span>The world!</span>, this.props), tmp);
+    menuItems.push({
+      item: {
+        label: 'Add account',
+        click: this.initModal(),
+        enabled: true,
+      },
+      modal: atom.workspace.addModalPanel({
+        item: tmp,
+        visible: false,
+      }),
+    });
+    return menuItems;
+  }
+
+  private initMenu(menuItems: MenuItem[]) {
     const menu = this.state.menu;
-    menu.append(new MenuItem({
-      label: 'Add account',
-      click: () => console.log(1),
-      enabled: true,
-    }));
-    menu.append(new MenuItem({
-      label: 'Import acccount',
-      click: () => console.log(2),
-      enabled: true,
-    }));
-    this.setState({ menu });
+    menuItems.forEach((val) => {
+      menu.append(new MenuItem(val.item));
+    });
+    // menu.append(new MenuItem({
+    //   label: 'Add account',
+    //   // Todo: Move init function here
+    //   click: this.initModal(),
+    //   enabled: true,
+    // }));
+    // menu.append(new MenuItem({
+    //   label: 'Import acccount',
+    //   click: () => console.log(2),
+    //   enabled: true,
+    // }));
+    this.setState({ menu, menuItems });
+  }
+
+  private initModal() {
+    // this.modalPanel = atom.workspace.addModalPanel({
+    //   item: this.substratePluginView.getElement(),
+    //   visible: false
+    // });
+    return () => {
+      const menuItems = this.state.menuItems;
+      const modal = menuItems[0].modal;
+      modal.show();
+      // menuItems.find((val) => val.item.)
+      // const panels = atom.workspace.getModalPanels();
+      // console.log(panels);
+    };
   }
 }
 
