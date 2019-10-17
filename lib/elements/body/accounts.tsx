@@ -7,6 +7,7 @@ import { Keyring } from "@polkadot/keyring";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 import { AccountComponent } from "../../components/accounts";
+import { AddAccount } from "../modals/addAccount";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -52,7 +53,11 @@ class AccountsBodyPanel extends React.Component<Props, State> {
 
   componentDidMount() {
     const menuItems = this.initMenuItems();
-    this.initMenu(menuItems);
+    const menu = this.state.menu;
+    menuItems.forEach((val) => {
+      menu.append(new MenuItem(val.item));
+    });
+    this.setState({ menu, menuItems });
   }
 
   public render(): JSX.Element {
@@ -80,53 +85,30 @@ class AccountsBodyPanel extends React.Component<Props, State> {
 
   private initMenuItems(): MenuItem[] {
     const menuItems = [];
-    const tmp = document.createElement("div");
-    ReactDOM.render(React.createElement(()=><span>The world!</span>, this.props), tmp);
-    menuItems.push({
-      item: {
-        label: 'Add account',
-        click: this.initModal(),
-        enabled: true,
-      },
-      modal: atom.workspace.addModalPanel({
-        item: tmp,
-        visible: false,
-      }),
-    });
+    menuItems.push(this.initModal('Add account', true, AddAccount));
+    // menuItems.push(this.initModal('Import acccount', true, ImportAccount));
     return menuItems;
   }
 
-  private initMenu(menuItems: MenuItem[]) {
-    const menu = this.state.menu;
-    menuItems.forEach((val) => {
-      menu.append(new MenuItem(val.item));
-    });
-    // menu.append(new MenuItem({
-    //   label: 'Add account',
-    //   // Todo: Move init function here
-    //   click: this.initModal(),
-    //   enabled: true,
-    // }));
-    // menu.append(new MenuItem({
-    //   label: 'Import acccount',
-    //   click: () => console.log(2),
-    //   enabled: true,
-    // }));
-    this.setState({ menu, menuItems });
-  }
-
-  private initModal() {
-    // this.modalPanel = atom.workspace.addModalPanel({
-    //   item: this.substratePluginView.getElement(),
-    //   visible: false
-    // });
-    return () => {
+  private initModal(label: string, enabled: boolean, component: any /* Replace with type*/): MenuItem {
+    const click = () => {
       const menuItems = this.state.menuItems;
-      const modal = menuItems[0].modal;
-      modal.show();
-      // menuItems.find((val) => val.item.)
-      // const panels = atom.workspace.getModalPanels();
-      // console.log(panels);
+      const item = menuItems.find(val => val.item.label === label);
+      if (!item) {
+        return console.error("Invalid item");
+      }
+      const modal = item.modal;
+      modal.visible ? modal.hide() : modal.show();
+    };
+    const modal = document.createElement("div");
+    modal.onclick = click;
+    ReactDOM.render(React.createElement(component, this.props), modal);
+    return {
+      item: { label, click, enabled },
+      modal: atom.workspace.addModalPanel({
+        item: modal,
+        visible: false,
+      }),
     };
   }
 }
