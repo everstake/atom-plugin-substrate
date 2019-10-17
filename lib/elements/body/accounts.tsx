@@ -101,8 +101,8 @@ class AccountsBodyPanel extends React.Component<Props, State> {
       modal.visible ? modal.hide() : modal.show();
     };
     const modal = document.createElement("div");
-    modal.onclick = click;
-    ReactDOM.render(React.createElement(component, this.props), modal);
+    // modal.onclick = click;
+    ReactDOM.render(React.createElement(component, { click }), modal);
     return {
       item: { label, click, enabled },
       modal: atom.workspace.addModalPanel({
