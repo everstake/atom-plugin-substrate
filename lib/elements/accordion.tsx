@@ -6,11 +6,13 @@ import ExtrinsicsBodyPanel from "./body/extrinsics";
 import NodesBodyPanel from "./body/nodes";
 import { AppState } from "../store";
 import { TabsState } from "../store/modules/tabs/types";
+import { init } from "../store/modules/substrate/actions";
 import { setPanels } from "../store/modules/tabs/actions";
 
 export type Props = {
   tabs: TabsState,
   setPanels: typeof setPanels,
+  init: typeof init,
 };
 
 type State = {};
@@ -33,6 +35,7 @@ class AccordionPanel extends React.Component<Props, State> {
       closed: false,
       component: (props: any) => <ExtrinsicsBodyPanel {...props} />,
     }]);
+    this.props.init();
   }
 
   public render(): JSX.Element {
@@ -49,10 +52,11 @@ class AccordionPanel extends React.Component<Props, State> {
 }
 
 const mapStateToProps = (state: AppState) => ({
+  substrate: state.substrate,
   tabs: state.tabs,
 });
 
 export default connect(
   mapStateToProps,
-  { setPanels }
+  { setPanels, init }
 )(AccordionPanel);

@@ -1,7 +1,7 @@
 import * as React from "react";
-import { mnemonicGenerate, randomAsU8a } from '@polkadot/util-crypto';
-import { KeypairType } from '@polkadot/util-crypto/types';
-import { u8aToHex } from '@polkadot/util';
+import { mnemonicGenerate, randomAsU8a } from "@polkadot/util-crypto";
+import { KeypairType } from "@polkadot/util-crypto/types";
+import { u8aToHex } from "@polkadot/util";
 
 import { ModalComponent } from "../../components/modal";
 import { DefaultButtonComponent } from "../../components/buttons/default";
@@ -24,31 +24,36 @@ type State = {
     items: Item[],
   },
   seed: string,
+  pass: string,
+};
+
+const DefaultState: State = {
+  name: "",
+  keypairType: {
+    selected: 0,
+    items: [{
+      label: "sr25519" as KeypairType,
+    }, {
+      label: "ed25519" as KeypairType,
+    }],
+  },
+  keyType: {
+    selected: 0,
+    items: [{ label: "Raw seed" }, { label: "Mnemonic seed" }],
+  },
+  seed: u8aToHex(randomAsU8a()),
+  pass: "",
 };
 
 export class AddAccount extends React.Component<Props, State> {
-  public state: State = {
-    name: "",
-    keypairType: {
-      selected: 0,
-      items: [{
-        label: 'sr25519' as KeypairType,
-      }, {
-        label: 'ed25519' as KeypairType,
-      }],
-    },
-    keyType: {
-      selected: 0,
-      items: [{ label: 'Raw seed' }, { label: 'Mnemonic seed' }],
-    },
-    seed: u8aToHex(randomAsU8a()),
-  };
+  public state: State = DefaultState;
 
   public render(): JSX.Element {
     return (
       <ModalComponent className="add-account">
         <TextInputComponent
           className="name"
+          type="text"
           title="Account name"
           placeholder="Alice"
           value={this.state.name}
@@ -63,10 +68,19 @@ export class AddAccount extends React.Component<Props, State> {
         />
         <TextInputComponent
           className="seed"
+          type="text"
           title="Account seed"
           placeholder="0xefbe98e1d2a3b034df8637445f0b1c2a9979cbd8c2dbfe2cfd7910a7fdc236c1"
           value={this.state.seed}
           onChange={(val: string) => this.setState({ seed: val })}
+        />
+        <TextInputComponent
+          className="password"
+          type="password"
+          title="Acccount encryption passphrase"
+          placeholder="$Str0ngPassw0rd"
+          value={this.state.pass}
+          onChange={(val: string) => this.setState({ pass: val })}
         />
         <div className="buttons">
           <DefaultButtonComponent
@@ -84,8 +98,9 @@ export class AddAccount extends React.Component<Props, State> {
     );
   }
 
+  // Todo: Move to substrate folder
   private generateSeed(keyType: string) {
-    return keyType !== 'Raw seed' ?
+    return keyType !== "Raw seed" ?
       mnemonicGenerate() : u8aToHex(randomAsU8a());
   }
 
@@ -105,5 +120,6 @@ export class AddAccount extends React.Component<Props, State> {
   private handleConfirm(e: React.MouseEvent) {
     console.log(this.state);
     this.props.confirmClick(e);
+    this.setState(DefaultState);
   }
 }

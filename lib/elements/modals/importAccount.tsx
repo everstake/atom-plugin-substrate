@@ -22,6 +22,7 @@ export class ImportAccount extends React.Component<Props, State> {
       <ModalComponent className="import-account">
         <TextInputComponent
           className="path"
+          type="text"
           title="Account file path"
           placeholder=""
           value={this.state.path}

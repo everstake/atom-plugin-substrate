@@ -1,8 +1,9 @@
 import { createStore, combineReducers } from "redux";
 
-import { tabs } from "./modules";
+import { tabs, substrate } from "./modules";
 
 const systemReducers = {
+  substrate: substrate.reducers.reducer,
   tabs: tabs.reducers.reducer,
 };
 

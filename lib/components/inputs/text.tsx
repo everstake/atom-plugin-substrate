@@ -2,6 +2,7 @@ import * as React from "react";
 
 export interface Props {
   className: string;
+  type: string,
   title: string;
   placeholder: string;
   value: string;
@@ -19,7 +20,7 @@ export class TextInputComponent extends React.Component<Props, State> {
         <span>{this.props.title}</span>
         <input
           className="native-key-bindings"
-          type="text"
+          type={this.props.type}
           placeholder={this.props.placeholder}
           value={this.props.value}
           onChange={(e: any) => this.props.onChange(e.target.value)}

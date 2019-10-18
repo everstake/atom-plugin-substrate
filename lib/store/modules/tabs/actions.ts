@@ -1,15 +1,15 @@
-import { ActionTypes, PanelType } from "./types";
+import { TabsActionTypes, PanelType } from "./types";
 
 export function setPanels(panels: PanelType[]) {
   return {
-    type: ActionTypes.SET_TABS,
+    type: TabsActionTypes.SET_TABS,
     payload: panels,
   };
 }
 
 export function togglePanel(id: number) {
   return {
-    type: ActionTypes.TOGGLE_PANEL,
+    type: TabsActionTypes.TOGGLE_PANEL,
     payload: id,
   };
 }

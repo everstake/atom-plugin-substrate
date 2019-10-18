@@ -1,5 +1,4 @@
 import * as React from "react";
-import { CompositeDisposable } from "atom";
 import { Store } from "redux";
 import { Provider } from "react-redux";
 
@@ -16,7 +15,6 @@ export class SidebarPanel extends React.Component<Props, State> {
   public state: State = {
     store: configureStore(),
   };
-  private subscriptions = new CompositeDisposable();
 
   public render(): JSX.Element {
     return (

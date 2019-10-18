@@ -11,21 +11,21 @@ export interface TabsState {
 }
 
 // Describing the different ACTION NAMES available
-export enum ActionTypes {
+export enum TabsActionTypes {
   TOGGLE_PANEL = "TOGGLE_PANEL",
   SET_TABS = "SET_TABS",
 }
 
 export interface IBaseAction {
-  type: ActionTypes,
+  type: TabsActionTypes,
 }
 
 export interface ISetTabsAction extends IBaseAction {
-  type: ActionTypes.SET_TABS;
+  type: TabsActionTypes.SET_TABS;
   payload: PanelType[];
 }
 
 export interface ITogglePanelAction extends IBaseAction {
-  type: ActionTypes.TOGGLE_PANEL;
+  type: TabsActionTypes.TOGGLE_PANEL;
   payload: number;
 }

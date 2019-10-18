@@ -1,9 +1,9 @@
 import {
-  ActionTypes,
+  TabsActionTypes,
   TabsState, ISetTabsAction, ITogglePanelAction,
 } from "./types";
 
-export type TabsActionTypes = ITogglePanelAction | ISetTabsAction;
+export type ActionTypes = ITogglePanelAction | ISetTabsAction;
 
 const initialState: TabsState = {
   panels: [],
@@ -11,16 +11,16 @@ const initialState: TabsState = {
 
 export function reducer(
   state = initialState,
-  action: TabsActionTypes,
+  action: ActionTypes,
 ): TabsState {
   switch (action.type) {
-    case ActionTypes.SET_TABS: {
+    case TabsActionTypes.SET_TABS: {
       return {
         ...state,
         panels: action.payload,
       };
     }
-    case ActionTypes.TOGGLE_PANEL: {
+    case TabsActionTypes.TOGGLE_PANEL: {
       return {
         ...state,
         panels: state.panels.map((val) => {
