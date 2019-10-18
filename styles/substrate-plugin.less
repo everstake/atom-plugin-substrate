@@ -4,37 +4,11 @@
 // for a full listing of what's available.
 @import "ui-variables";
 @import "./tabs";
+@import "./components/si-text";
+@import "./components/sb-default";
 @import "./modals/modal";
 
 .substrate-plugin {
-  .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #181a1f;
-    margin-bottom: 5px;
-
-    .title {
-      margin: 5px 10px;
-      font-size: 12px;
-    }
-
-    .buttons {
-      height: 100%;
-      border-left: 1px solid #181a1f;
-      .button {
-        padding: 5px 10px;
-        cursor: pointer;
-        font-size: 0;
-        line-height: inherit;
-        &:before {
-          content: '• • •';
-          font-size: 11px;
-        }
-      }
-    }
-  }
-
   .substrate-plugin-sidebar .accordion {
     height: 100vh;
     display: flex;
@@ -56,8 +30,9 @@
         .actions {
           cursor: pointer;
           font-size: 6px;
-          width: 30px;
-          padding: 5px 10px 5px 0;
+          width: 36px;
+          padding: 5px 5px 5px 5px;
+          text-align: center;
         }
         span {
           cursor: pointer;

@@ -1,22 +1,31 @@
 import * as React from "react";
 
-export type Props = {
-  className: string,
-  placeholder: string,
+export interface Props {
+  className: string;
+  title: string;
+  placeholder: string;
+  value: string;
+  onChange: (event: React.ChangeEvent) => void;
 };
 
-type State = {};
+interface State {
+};
 
 export class TextInputComponent extends React.Component<Props, State> {
   public state: State = {};
 
   public render(): JSX.Element {
     return (
-      <input
-        className={`si-text ${this.props.className}`}
-        type="text"
-        placeholder={this.props.placeholder}
-      />
+      <div className="si-text">
+        <span>{this.props.title}</span>
+        <input
+          className={`native-key-bindings ${this.props.className}`}
+          type="text"
+          placeholder={this.props.placeholder}
+          value={this.props.value}
+          onChange={this.props.onChange}
+        />
+      </div>
     );
   }
 }

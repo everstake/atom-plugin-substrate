@@ -8,6 +8,7 @@ import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 import { AccountComponent } from "../../components/accounts";
 import { AddAccount } from "../modals/addAccount";
+import { ImportAccount } from "../modals/importAccount";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -86,11 +87,11 @@ class AccountsBodyPanel extends React.Component<Props, State> {
   private initMenuItems(): MenuItem[] {
     const menuItems = [];
     menuItems.push(this.initModal('Add account', true, AddAccount));
-    // menuItems.push(this.initModal('Import acccount', true, ImportAccount));
+    menuItems.push(this.initModal('Import acccount', true, ImportAccount));
     return menuItems;
   }
 
-  private initModal(label: string, enabled: boolean, component: any /* Replace with type*/): MenuItem {
+  private initModal(label: string, enabled: boolean, component: React.ComponentClass<any>): MenuItem {
     const click = () => {
       const menuItems = this.state.menuItems;
       const item = menuItems.find(val => val.item.label === label);
@@ -102,7 +103,10 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     };
     const modal = document.createElement("div");
     // modal.onclick = click;
-    ReactDOM.render(React.createElement(component, { click }), modal);
+    ReactDOM.render(React.createElement(component, {
+      cancelClick: click,
+      confirmClick: click,
+    }), modal);
     return {
       item: { label, click, enabled },
       modal: atom.workspace.addModalPanel({
