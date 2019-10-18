@@ -5,25 +5,24 @@ export interface Props {
   title: string;
   placeholder: string;
   value: string;
-  onChange: (event: React.ChangeEvent) => void;
+  onChange: (val: string) => void;
 };
 
-interface State {
-};
+interface State {};
 
 export class TextInputComponent extends React.Component<Props, State> {
   public state: State = {};
 
   public render(): JSX.Element {
     return (
-      <div className="si-text">
+      <div className={`si-text ${this.props.className}`}>
         <span>{this.props.title}</span>
         <input
-          className={`native-key-bindings ${this.props.className}`}
+          className="native-key-bindings"
           type="text"
           placeholder={this.props.placeholder}
           value={this.props.value}
-          onChange={this.props.onChange}
+          onChange={(e: any) => this.props.onChange(e.target.value)}
         />
       </div>
     );

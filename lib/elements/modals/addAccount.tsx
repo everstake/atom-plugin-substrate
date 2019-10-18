@@ -1,7 +1,12 @@
 import * as React from "react";
+import { mnemonicGenerate, randomAsU8a } from '@polkadot/util-crypto';
+import { KeypairType } from '@polkadot/util-crypto/types';
+import { u8aToHex } from '@polkadot/util';
+
 import { ModalComponent } from "../../components/modal";
 import { DefaultButtonComponent } from "../../components/buttons/default";
 import { TextInputComponent } from "../../components/inputs/text";
+import { SelectInputComponent, Item } from "../../components/inputs/select";
 
 export type Props = {
   cancelClick: (e: React.MouseEvent) => void;
@@ -10,13 +15,33 @@ export type Props = {
 
 type State = {
   name: string,
-  hash: string,
+  keypairType: {
+    selected: number,
+    items: Item[],
+  },
+  keyType: {
+    selected: number,
+    items: Item[],
+  },
+  seed: string,
 };
 
 export class AddAccount extends React.Component<Props, State> {
   public state: State = {
     name: "",
-    hash: "",
+    keypairType: {
+      selected: 0,
+      items: [{
+        label: 'sr25519' as KeypairType,
+      }, {
+        label: 'ed25519' as KeypairType,
+      }],
+    },
+    keyType: {
+      selected: 0,
+      items: [{ label: 'Raw seed' }, { label: 'Mnemonic seed' }],
+    },
+    seed: u8aToHex(randomAsU8a()),
   };
 
   public render(): JSX.Element {
@@ -27,14 +52,21 @@ export class AddAccount extends React.Component<Props, State> {
           title="Account name"
           placeholder="Alice"
           value={this.state.name}
-          onChange={(e: any) => this.setState({ name: e.target.value })}
+          onChange={(val: string) => this.setState({ name: val })}
+        />
+        <SelectInputComponent
+          className="key-type"
+          title="Account key type"
+          items={this.state.keyType.items}
+          selectedItem={this.state.keyType.selected}
+          onChange={(_: Item, idx: number) => this.selectKeyType(idx)}
         />
         <TextInputComponent
-          className="hash"
-          title="Account address"
+          className="seed"
+          title="Account seed"
           placeholder="0xefbe98e1d2a3b034df8637445f0b1c2a9979cbd8c2dbfe2cfd7910a7fdc236c1"
-          value={this.state.hash}
-          onChange={(e: any) => this.setState({ hash: e.target.value })}
+          value={this.state.seed}
+          onChange={(val: string) => this.setState({ seed: val })}
         />
         <div className="buttons">
           <DefaultButtonComponent
@@ -45,10 +77,33 @@ export class AddAccount extends React.Component<Props, State> {
           <DefaultButtonComponent
             className="confirm"
             title="Add account"
-            onClick={this.props.confirmClick}
+            onClick={this.handleConfirm.bind(this)}
           />
         </div>
       </ModalComponent>
     );
+  }
+
+  private generateSeed(keyType: string) {
+    return keyType !== 'Raw seed' ?
+      mnemonicGenerate() : u8aToHex(randomAsU8a());
+  }
+
+  private selectKeyType(idx: number) {
+    const items = this.state.keyType.items;
+    const keyType = items[idx].label;
+    const seed = this.generateSeed(keyType);
+    this.setState({
+      keyType: {
+        selected: idx,
+        items: items,
+      },
+      seed,
+    });
+  }
+
+  private handleConfirm(e: React.MouseEvent) {
+    console.log(this.state);
+    this.props.confirmClick(e);
   }
 }

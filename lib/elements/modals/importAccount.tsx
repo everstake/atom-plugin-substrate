@@ -25,7 +25,7 @@ export class ImportAccount extends React.Component<Props, State> {
           title="Account file path"
           placeholder=""
           value={this.state.path}
-          onChange={(e: any) => this.setState({ path: e.target.value })}
+          onChange={(val: string) => this.setState({ path: val })}
         />
         <div className="buttons">
           <DefaultButtonComponent
