@@ -1,12 +1,13 @@
 import * as React from "react";
+import { remote } from "electron";
 
 import { ModalComponent } from "../../components/modal";
-import { TextInputComponent } from "../../components/inputs/text";
+import { FileInputComponent } from "../../components/inputs/file";
 import { DefaultButtonComponent } from "../../components/buttons/default";
 
 export interface Props {
   closeModal: () => void;
-  confirmClick: () => void;
+  confirmClick: (path: string) => void;
 };
 
 interface State {
@@ -23,13 +24,12 @@ export class ImportAccount extends React.Component<Props, State> {
   public render(): JSX.Element {
     return (
       <ModalComponent className="import-account">
-        <TextInputComponent
+        <FileInputComponent
           className="path"
-          type="text"
           title="Account file path"
           placeholder=""
           value={this.state.path}
-          onChange={(val: string) => this.setState({ path: val })}
+          onClick={() => this.handleFileClick()}
         />
         <div className="buttons">
           <DefaultButtonComponent
@@ -47,8 +47,19 @@ export class ImportAccount extends React.Component<Props, State> {
     );
   }
 
+  private async handleFileClick() {
+    const files: any = await remote.dialog.showOpenDialog(
+      remote.getCurrentWindow(), {
+      properties: ['openFile'],
+    });
+    if (!files || !files.length) {
+      return;
+    }
+    this.setState({ path: files[0] });
+  }
+
   private handleConfirm(e: React.MouseEvent) {
-    console.log(this.state);
+    this.props.confirmClick(this.state.path);
     this.props.closeModal();
     this.setState(DefaultState);
   }
