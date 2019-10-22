@@ -3,6 +3,7 @@ import {
   SubstrateActionTypes,
   IAddAccountSubstrateAction,
   IRemoveAccountSubstrateAction,
+  IRenameAccountSubstrateAction,
 } from "./types";
 
 export function addAccount(account: KeyringPair$Json): IAddAccountSubstrateAction {
@@ -16,5 +17,12 @@ export function removeAccount(name: string): IRemoveAccountSubstrateAction {
   return {
     type: SubstrateActionTypes.REMOVE_ACCOUNT,
     payload: name,
+  };
+}
+
+export function renameAccount(oldName: string, newName: string): IRenameAccountSubstrateAction {
+  return {
+    type: SubstrateActionTypes.RENAME_ACCOUNT,
+    payload: { oldName, newName },
   };
 }

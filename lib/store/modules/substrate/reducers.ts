@@ -3,11 +3,13 @@ import {
   SubstrateState,
   IAddAccountSubstrateAction,
   IRemoveAccountSubstrateAction,
+  IRenameAccountSubstrateAction,
 } from "./types";
 
 export type ActionTypes =
   | IAddAccountSubstrateAction
-  | IRemoveAccountSubstrateAction;
+  | IRemoveAccountSubstrateAction
+  | IRenameAccountSubstrateAction;
 
 const initialState: SubstrateState = {
   isConnected: false,
@@ -36,6 +38,17 @@ export function reducer(
       }
       accounts.splice(index, 1);
       return { ...state, accounts };
+    }
+    case SubstrateActionTypes.RENAME_ACCOUNT: {
+      return {
+        ...state,
+        accounts: state.accounts.map(val => {
+          if (val.meta.name === action.payload.oldName) {
+            val.meta.name = action.payload.newName
+          }
+          return val;
+        }),
+      };
     }
     default:
       return state;

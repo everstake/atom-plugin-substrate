@@ -9,6 +9,7 @@ export interface SubstrateState {
 export enum SubstrateActionTypes {
   ADD_ACCOUNT = "ADD_ACCOUNT",
   REMOVE_ACCOUNT = "REMOVE_ACCOUNT",
+  RENAME_ACCOUNT = "RENAME_ACCOUNT",
 }
 
 export interface IBaseAction {
@@ -23,4 +24,9 @@ export interface IAddAccountSubstrateAction extends IBaseAction {
 export interface IRemoveAccountSubstrateAction extends IBaseAction {
   type: SubstrateActionTypes.REMOVE_ACCOUNT;
   payload: string;
+}
+
+export interface IRenameAccountSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.RENAME_ACCOUNT;
+  payload: { oldName: string, newName: string };
 }

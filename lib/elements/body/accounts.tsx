@@ -12,10 +12,11 @@ import * as clipboard from 'clipboardy';
 import { AccountComponent, ContextItem } from "../../components/accounts";
 import { AddAccount } from "../modals/addAccount";
 import { ImportAccount } from "../modals/importAccount";
+import { RenameAccount } from "../modals/RenameAccount";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
-import { addAccount, removeAccount } from "../../store/modules/substrate/actions";
+import { addAccount, removeAccount, renameAccount } from "../../store/modules/substrate/actions";
 import { togglePanel } from "../../store/modules/tabs/actions";
 
 const { Menu, MenuItem, dialog } = remote;
@@ -23,7 +24,6 @@ const { Menu, MenuItem, dialog } = remote;
 interface MenuItem {
   item: MenuItemConstructorOptions,
   modal?: Panel;
-  contextClick?: (args: any) => void;
 };
 
 export type Props = {
@@ -33,6 +33,7 @@ export type Props = {
   togglePanel: typeof togglePanel,
   addAccount: typeof addAccount,
   removeAccount: typeof removeAccount,
+  renameAccount: typeof renameAccount,
 };
 
 type State = {
@@ -64,6 +65,9 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     }, {
       label: "Export account",
       click: this.exportAccount.bind(this),
+    }, {
+      label: "Rename account",
+      click: this.renameAccount.bind(this),
     }],
     accountInput: { name: "", key: "" },
   };
@@ -160,6 +164,19 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     };
   }
 
+  private initAccountContextItemModal(component: any, props: any, confirmClick: any, click: () => void): Panel {
+    const modal = document.createElement("div");
+    ReactDOM.render(React.createElement(component, {
+      closeModal: click,
+      confirmClick,
+      ...props,
+    }), modal);
+    return atom.workspace.addModalPanel({
+      item: modal,
+      visible: false,
+    });
+  }
+
   private handleAccountMenuClick(label: string, pair: KeyringPair$Json) {
     this.state.accountContextItems.forEach(val => {
       if (val.label === label) {
@@ -185,6 +202,13 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     }
     fs.writeFileSync(savePath, JSON.stringify(pair), "utf8");
   }
+
+  private async renameAccount(pair: KeyringPair$Json) {
+    const mod = this.initAccountContextItemModal(RenameAccount, { pair }, (name: string) => {
+      this.props.renameAccount(pair.meta.name, name);
+    }, () => mod.hide());
+    mod.show();
+  }
 }
 
 const mapStateToProps = (state: AppState) => ({
@@ -194,5 +218,5 @@ const mapStateToProps = (state: AppState) => ({
 
 export default connect(
   mapStateToProps,
-  { togglePanel, addAccount, removeAccount }
+  { togglePanel, addAccount, removeAccount, renameAccount }
 )(AccountsBodyPanel);
