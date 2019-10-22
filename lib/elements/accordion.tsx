@@ -6,42 +6,26 @@ import ExtrinsicsBodyPanel from "./body/extrinsics";
 import NodesBodyPanel from "./body/nodes";
 import { AppState } from "../store";
 import { TabsState } from "../store/modules/tabs/types";
-import { init } from "../store/modules/substrate/actions";
-import { setPanels } from "../store/modules/tabs/actions";
 
 export type Props = {
   tabs: TabsState,
-  setPanels: typeof setPanels,
-  init: typeof init,
 };
 
 type State = {};
 
 class AccordionPanel extends React.Component<Props, State> {
-  componentDidMount() {
-    this.props.setPanels([{
-      id: 0,
-      title: "My node connections",
-      closed: false,
-      component: (props: any) => <NodesBodyPanel {...props} />,
-    }, {
-      id: 1,
-      title: "My accounts",
-      closed: false,
-      component: (props: any) => <AccountsBodyPanel {...props} />,
-    }, {
-      id: 2,
-      title: "Available extrinsics",
-      closed: false,
-      component: (props: any) => <ExtrinsicsBodyPanel {...props} />,
-    }]);
-    this.props.init();
-  }
-
   public render(): JSX.Element {
     const panels = this.props.tabs.panels;
     const tabs = panels.map((val) => {
-      return val.component({ key: val.id, id: val.id });
+      const props = { key: val.id, id: val.id };
+      switch (val.id) {
+        case 0:
+          return <NodesBodyPanel {...props} />
+        case 1:
+          return <AccountsBodyPanel {...props} />
+        default:
+          return <ExtrinsicsBodyPanel {...props} />
+      }
     });
     return (
       <div className="accordion">
@@ -58,5 +42,5 @@ const mapStateToProps = (state: AppState) => ({
 
 export default connect(
   mapStateToProps,
-  { setPanels, init }
+  {},
 )(AccordionPanel);

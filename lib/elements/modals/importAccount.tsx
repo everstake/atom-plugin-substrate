@@ -1,21 +1,24 @@
 import * as React from "react";
+
 import { ModalComponent } from "../../components/modal";
 import { TextInputComponent } from "../../components/inputs/text";
 import { DefaultButtonComponent } from "../../components/buttons/default";
 
 export interface Props {
-  cancelClick: (e: React.MouseEvent) => void;
-  confirmClick: (e: React.MouseEvent) => void;
+  closeModal: () => void;
+  confirmClick: () => void;
 };
 
 interface State {
   path: string;
 };
 
+const DefaultState: State = {
+  path: "",
+};
+
 export class ImportAccount extends React.Component<Props, State> {
-  public state: State = {
-    path: "",
-  };
+  public state: State = DefaultState;
 
   public render(): JSX.Element {
     return (
@@ -32,15 +35,21 @@ export class ImportAccount extends React.Component<Props, State> {
           <DefaultButtonComponent
             className="cancel"
             title="Cancel"
-            onClick={this.props.cancelClick}
+            onClick={this.props.closeModal}
           />
           <DefaultButtonComponent
             className="confirm"
             title="Import account"
-            onClick={this.props.confirmClick}
+            onClick={this.handleConfirm.bind(this)}
           />
         </div>
       </ModalComponent>
     );
+  }
+
+  private handleConfirm(e: React.MouseEvent) {
+    console.log(this.state);
+    this.props.closeModal();
+    this.setState(DefaultState);
   }
 }

@@ -3,7 +3,6 @@ export interface PanelType {
   id: number;
   title: string;
   closed: boolean;
-  component: (props: any) => JSX.Element;
 };
 
 export interface TabsState {

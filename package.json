@@ -41,6 +41,7 @@
     "@polkadot/keyring": "^1.4.1",
     "@polkadot/util-crypto": "^1.4.1",
     "atom-ts-transpiler": "^1.5.2",
+    "clipboardy": "^2.1.0",
     "list": "^2.0.14",
     "react": "^16.10.1",
     "react-dom": "^16.10.1",

@@ -4,9 +4,11 @@ import { CompositeDisposable } from "atom";
 import * as Path from "path";
 
 import { SidebarPanel, Props } from "./elements/sidebar";
+import configureStore from "./store";
+import { setPanels } from "./store/modules/tabs/actions";
 
 type State = {
-  props: Props,
+  reduxState: string,
 };
 
 module.exports = new class SubstratePlugin {
@@ -23,7 +25,7 @@ module.exports = new class SubstratePlugin {
     this.element = document.createElement("div");
     this.element.classList.add("substrate-plugin");
     this.props = {
-      accounts: [],
+      store: configureStore(),
     };
     this.render();
   }
@@ -33,7 +35,7 @@ module.exports = new class SubstratePlugin {
       try {
         this.activatePlugin(state);
       } catch (err) {
-        console.log(err);
+        console.log("System error", err);
       }
     } else {
       this.activatePlugin(state);
@@ -44,8 +46,9 @@ module.exports = new class SubstratePlugin {
     this.subscriptions.dispose();
   }
 
-  public serialize(): Props {
-    return this.props;
+  public serialize(): State {
+    const reduxState = this.props.store.getState();
+    return { reduxState: JSON.stringify(reduxState) };
   }
 
   public consumeStatusBar(statusBar: any) {
@@ -76,7 +79,24 @@ module.exports = new class SubstratePlugin {
       })
     );
     if (state) {
-      this.props = state.props;
+      const reduxState = JSON.parse(state.reduxState);
+      this.props.store = configureStore(reduxState);
+    }
+    if (!this.props.store.getState().tabs.panels.length) {
+      const action = setPanels([{
+        id: 0,
+        title: "My node connections",
+        closed: false,
+      }, {
+        id: 1,
+        title: "My accounts",
+        closed: false,
+      }, {
+        id: 2,
+        title: "Available extrinsics",
+        closed: false,
+      }]);
+      this.props.store.dispatch(action);
     }
   }
 

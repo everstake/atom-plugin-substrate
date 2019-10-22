@@ -1,16 +1,12 @@
-import { Keyring } from '@polkadot/keyring';
-
 import {
   SubstrateActionTypes,
-  SubstrateState, IInitSubstrateAction,
+  SubstrateState, IAddAccountSubstrateAction,
 } from "./types";
 
-export type ActionTypes = IInitSubstrateAction;
+export type ActionTypes = IAddAccountSubstrateAction;
 
 const initialState: SubstrateState = {
   isConnected: false,
-  keyring: new Keyring({ type: 'sr25519' }),
-
   accounts: [],
 };
 
@@ -19,9 +15,13 @@ export function reducer(
   action: ActionTypes,
 ): SubstrateState {
   switch (action.type) {
-    case SubstrateActionTypes.INIT: {
+    case SubstrateActionTypes.ADD_ACCOUNT: {
       return {
         ...state,
+        accounts: [
+          ...state.accounts,
+          action.payload,
+        ],
       };
     }
     default:

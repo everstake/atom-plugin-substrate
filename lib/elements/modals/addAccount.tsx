@@ -9,8 +9,13 @@ import { TextInputComponent } from "../../components/inputs/text";
 import { SelectInputComponent, Item } from "../../components/inputs/select";
 
 export type Props = {
-  cancelClick: (e: React.MouseEvent) => void;
-  confirmClick: (e: React.MouseEvent) => void;
+  closeModal: () => void;
+  confirmClick: (
+    name: string,
+    keypairType: KeypairType,
+    seed: string,
+    pass: string,
+  ) => void;
 };
 
 type State = {
@@ -86,7 +91,7 @@ export class AddAccount extends React.Component<Props, State> {
           <DefaultButtonComponent
             className="cancel"
             title="Cancel"
-            onClick={this.props.cancelClick}
+            onClick={this.props.closeModal}
           />
           <DefaultButtonComponent
             className="confirm"
@@ -117,9 +122,11 @@ export class AddAccount extends React.Component<Props, State> {
     });
   }
 
-  private handleConfirm(e: React.MouseEvent) {
-    console.log(this.state);
-    this.props.confirmClick(e);
+  private handleConfirm(_: React.MouseEvent) {
+    const { name, keypairType, seed, pass } = this.state;
+    const pairType = keypairType.items[keypairType.selected].label;
+    this.props.confirmClick(name, pairType as KeypairType, seed, pass);
+    this.props.closeModal();
     this.setState(DefaultState);
   }
 }

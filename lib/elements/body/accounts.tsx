@@ -5,6 +5,7 @@ import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
+import { KeypairType } from "@polkadot/util-crypto/types";
 
 import { AccountComponent } from "../../components/accounts";
 import { AddAccount } from "../modals/addAccount";
@@ -12,14 +13,10 @@ import { ImportAccount } from "../modals/importAccount";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
+import { addAccount } from "../../store/modules/substrate/actions";
 import { togglePanel } from "../../store/modules/tabs/actions";
 
 const { Menu, MenuItem } = remote;
-
-interface Account {
-  name: string;
-  key: string;
-};
 
 interface MenuItem {
   item: MenuItemConstructorOptions,
@@ -29,27 +26,26 @@ interface MenuItem {
 export type Props = {
   id: number,
   tabs: TabsState,
+  accounts: KeyringPair$Json[],
   togglePanel: typeof togglePanel,
+  addAccount: typeof addAccount,
 };
 
 type State = {
   menu: MenuType,
   menuItems: MenuItem[],
-  keyring: Keyring,
-
-  // Todo: Move to redux storage
-  accountInput: Account,
-  accounts: KeyringPair$Json[],
+  accountInput: {
+    name: string;
+    key: string;
+  },
 };
 
 class AccountsBodyPanel extends React.Component<Props, State> {
   public state: State = {
     menu: new Menu(),
     menuItems: [],
-    keyring: new Keyring({ type: "sr25519" }),
 
     accountInput: { name: "", key: "" },
-    accounts: [],
   };
 
   componentDidMount() {
@@ -68,7 +64,7 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const accounts = this.state.accounts.map(({ address, meta }: KeyringPair$Json, index: number) => {
+    const accounts = this.props.accounts.map(({ address, meta }: KeyringPair$Json, index: number) => {
       return <AccountComponent key={index} name={meta.name} hash={address} />;
     });
     return (
@@ -86,12 +82,22 @@ class AccountsBodyPanel extends React.Component<Props, State> {
 
   private initMenuItems(): MenuItem[] {
     const menuItems = [];
-    menuItems.push(this.initModal('Add account', true, AddAccount));
-    menuItems.push(this.initModal('Import acccount', true, ImportAccount));
+    menuItems.push(this.initModal('Add account', true, AddAccount, (
+      name: string,
+      keypairType: KeypairType,
+      seed: string,
+      pass: string,
+    ) => {
+      const keyring = new Keyring({ type: keypairType });
+      const pair = keyring.addFromUri(seed, { name }, keypairType);
+      const json = pair.toJson(pass);
+      this.props.addAccount(json);
+    }));
+    menuItems.push(this.initModal('Import acccount', true, ImportAccount, () => {}));
     return menuItems;
   }
 
-  private initModal(label: string, enabled: boolean, component: React.ComponentClass<any>): MenuItem {
+  private initModal(label: string, enabled: boolean, component: any, confirmClick: any): MenuItem {
     const click = () => {
       const menuItems = this.state.menuItems;
       const item = menuItems.find(val => val.item.label === label);
@@ -102,10 +108,9 @@ class AccountsBodyPanel extends React.Component<Props, State> {
       modal.visible ? modal.hide() : modal.show();
     };
     const modal = document.createElement("div");
-    // modal.onclick = click;
     ReactDOM.render(React.createElement(component, {
-      cancelClick: click,
-      confirmClick: click,
+      closeModal: click,
+      confirmClick,
     }), modal);
     return {
       item: { label, click, enabled },
@@ -119,9 +124,10 @@ class AccountsBodyPanel extends React.Component<Props, State> {
 
 const mapStateToProps = (state: AppState) => ({
   tabs: state.tabs,
+  accounts: state.substrate.accounts,
 });
 
 export default connect(
   mapStateToProps,
-  { togglePanel }
+  { togglePanel, addAccount }
 )(AccountsBodyPanel);

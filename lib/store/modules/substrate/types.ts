@@ -1,22 +1,20 @@
-import { Keyring } from '@polkadot/keyring';
+import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 export interface SubstrateState {
   isConnected: boolean;
-  keyring: Keyring;
-
-  // Todo: Replace with real account type
-  accounts: string[];
+  accounts: KeyringPair$Json[],
 }
 
 // Describing the different ACTION NAMES available
 export enum SubstrateActionTypes {
-  INIT = "INIT",
+  ADD_ACCOUNT = "ADD_ACCOUNT",
 }
 
 export interface IBaseAction {
   type: SubstrateActionTypes,
 }
 
-export interface IInitSubstrateAction extends IBaseAction {
-  type: SubstrateActionTypes.INIT;
+export interface IAddAccountSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.ADD_ACCOUNT;
+  payload: KeyringPair$Json;
 }
