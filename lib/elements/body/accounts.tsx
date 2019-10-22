@@ -18,7 +18,7 @@ import { TabsState } from "../../store/modules/tabs/types";
 import { addAccount, removeAccount } from "../../store/modules/substrate/actions";
 import { togglePanel } from "../../store/modules/tabs/actions";
 
-const { Menu, MenuItem } = remote;
+const { Menu, MenuItem, dialog } = remote;
 
 interface MenuItem {
   item: MenuItemConstructorOptions,
@@ -61,6 +61,9 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     }, {
       label: "Remove account",
       click: this.removeAccount.bind(this),
+    }, {
+      label: "Export account",
+      click: this.exportAccount.bind(this),
     }],
     accountInput: { name: "", key: "" },
   };
@@ -81,12 +84,11 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const accounts = this.props.accounts.map(({ address, meta }: KeyringPair$Json, index: number) => {
+    const accounts = this.props.accounts.map((pair: KeyringPair$Json, index: number) => {
       return (
         <AccountComponent
           key={index}
-          name={meta.name}
-          hash={address}
+          pair={pair}
           accountContextItems={this.state.accountContextItems}
           onClick={this.handleAccountMenuClick.bind(this)}
         />
@@ -158,22 +160,30 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     };
   }
 
-  private handleAccountMenuClick(label: string, name: string, address: string) {
+  private handleAccountMenuClick(label: string, pair: KeyringPair$Json) {
     this.state.accountContextItems.forEach(val => {
       if (val.label === label) {
-        val.click(name, address);
+        val.click(pair);
         return;
       }
     })
   }
 
-  private copyAddress(_: string, address: string) {
-    clipboard.writeSync(address);
+  private copyAddress(pair: KeyringPair$Json) {
+    clipboard.writeSync(pair.address);
   }
 
-  private removeAccount(name: string, _: string) {
-    this.props.removeAccount(name);
+  private removeAccount(pair: KeyringPair$Json) {
+    this.props.removeAccount(pair.meta.name);
     this.forceUpdate();
+  }
+
+  private async exportAccount(pair: KeyringPair$Json) {
+    const savePath: any = await dialog.showSaveDialog({});
+    if (!savePath) {
+      return;
+    }
+    fs.writeFileSync(savePath, JSON.stringify(pair), "utf8");
   }
 }
 

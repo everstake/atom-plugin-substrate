@@ -1,23 +1,19 @@
 import * as React from "react";
 import * as Path from "path";
 import { Menu as MenuType, MenuItem as MenuItemType, remote } from "electron";
+import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 const { Menu, MenuItem } = remote;
 
 export interface ContextItem {
   label: string;
-  click: (name: string, address: string) => void;
+  click: (pair: KeyringPair$Json) => void;
 }
 
 export type Props = {
-  name: string,
-  hash: string,
+  pair: KeyringPair$Json,
   accountContextItems: ContextItem[],
-  onClick: (
-    label: string,
-    name: string,
-    hash: string,
-  ) => void,
+  onClick: (label: string, pair: KeyringPair$Json) => void,
 };
 
 type State = {
@@ -50,8 +46,8 @@ export class AccountComponent extends React.Component<Props, State> {
     return (
       <li className="account" onClick={() => this.state.itemMenu.menu.popup({})}>
         <img className="icon" src={path} />
-        <span className="name">{this.props.name}</span>
-        <span className="hash">{this.props.hash}</span>
+        <span className="name">{this.props.pair.meta.name}</span>
+        <span className="hash">{this.props.pair.address}</span>
       </li>
     );
   }
@@ -59,11 +55,7 @@ export class AccountComponent extends React.Component<Props, State> {
   private initContext(label: string, enabled: boolean): MenuItemType {
     return new MenuItem({
       label,
-      click: () => this.props.onClick(
-        label,
-        this.props.name,
-        this.props.hash,
-      ),
+      click: () => this.props.onClick(label, this.props.pair),
       enabled,
     });
   }
