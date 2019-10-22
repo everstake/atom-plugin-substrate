@@ -40,7 +40,6 @@ class NodesBodyPanel extends React.Component<Props, State> {
       <TabComponent
         className="nodes"
         panel={val}
-        menu={this.state.menu}
         onTabClick={() => this.props.togglePanel(val.id)}
         onActionsClick={() => this.state.menu.popup({})}
       >

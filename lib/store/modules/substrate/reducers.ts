@@ -1,9 +1,13 @@
 import {
   SubstrateActionTypes,
-  SubstrateState, IAddAccountSubstrateAction,
+  SubstrateState,
+  IAddAccountSubstrateAction,
+  IRemoveAccountSubstrateAction,
 } from "./types";
 
-export type ActionTypes = IAddAccountSubstrateAction;
+export type ActionTypes =
+  | IAddAccountSubstrateAction
+  | IRemoveAccountSubstrateAction;
 
 const initialState: SubstrateState = {
   isConnected: false,
@@ -23,6 +27,15 @@ export function reducer(
           action.payload,
         ],
       };
+    }
+    case SubstrateActionTypes.REMOVE_ACCOUNT: {
+      const accounts = state.accounts;
+      const index = accounts.findIndex((val) => val.meta['name'] === action.payload);
+      if (index === -1) {
+        return state;
+      }
+      accounts.splice(index, 1);
+      return { ...state, accounts };
     }
     default:
       return state;

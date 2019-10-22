@@ -1,12 +1,9 @@
 import * as React from "react";
-import { Menu } from "electron";
-
 import { PanelType } from "../store/modules/tabs/types";
 
 export type Props = {
   className: string,
   panel: PanelType,
-  menu: Menu,
   onTabClick: (event: React.MouseEvent) => void,
   onActionsClick: (event: React.MouseEvent) => void,
 };
