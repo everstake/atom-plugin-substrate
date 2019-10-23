@@ -94,7 +94,7 @@ module.exports = new class SubstratePlugin {
         closed: false,
       }, {
         id: 2,
-        title: "Available extrinsics",
+        title: "Extrinsics | Chain state | Contracts",
         closed: false,
       }]);
       this.props.store.dispatch(setPanelsAction);

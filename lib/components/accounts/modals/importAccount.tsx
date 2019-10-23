@@ -59,7 +59,12 @@ export class ImportAccount extends React.Component<Props, State> {
   }
 
   private handleConfirm(e: React.MouseEvent) {
-    this.props.confirmClick(this.state.path);
+    const { path } = this.state;
+    if (!path.trim().length) {
+      atom.notifications.addError("Invalid path to account file");
+      return;
+    }
+    this.props.confirmClick(path);
     this.props.closeModal();
     this.setState(DefaultState);
   }

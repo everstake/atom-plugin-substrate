@@ -5,7 +5,7 @@ import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 
 import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
-import { NodeComponent, ContextItem } from "../../components/nodes";
+import { NodeComponent, ContextItem } from "../../components/nodes/node";
 import { AddNode } from "../../components/nodes/modals/addNode";
 import { EditNode } from "../../components/nodes/modals/editNode";
 import { TabComponent } from "../../components/tab";
@@ -33,7 +33,7 @@ type State = {
     menuItems: MenuItemType[],
   },
 
-  nodeContextItems: ContextItem[],
+  contextItems: ContextItem[],
 };
 
 class NodesBodyPanel extends React.Component<Props, State> {
@@ -43,7 +43,7 @@ class NodesBodyPanel extends React.Component<Props, State> {
       menuItems: [],
     },
 
-    nodeContextItems: [{
+    contextItems: [{
       label: "Remove node",
       click: this.removeNode.bind(this),
     }, {
@@ -74,8 +74,8 @@ class NodesBodyPanel extends React.Component<Props, State> {
         <NodeComponent
           key={index}
           node={node}
-          accountContextItems={this.state.nodeContextItems}
-          onClick={this.handleAccountMenuClick.bind(this)}
+          accountContextItems={this.state.contextItems}
+          onClick={this.handleMenuClick.bind(this)}
         />
       );
     });
@@ -97,15 +97,15 @@ class NodesBodyPanel extends React.Component<Props, State> {
     menuItems.push({ item: { type: "separator" } as MenuItemConstructorOptions });
     menuItems.push(this.editTypes());
     menuItems.push(this.disconnectFromNode());
-    menuItems.push({ item: { type: "separator" } as MenuItemConstructorOptions });
-    menuItems.push(this.startLocalNode());
-    menuItems.push(this.stopLocalNode());
-    menuItems.push(this.clearChainData());
+    // menuItems.push({ item: { type: "separator" } as MenuItemConstructorOptions });
+    // menuItems.push(this.startLocalNode());
+    // menuItems.push(this.stopLocalNode());
+    // menuItems.push(this.clearChainData());
     return menuItems;
   }
 
-  private handleAccountMenuClick(label: string, node: INode) {
-    this.state.nodeContextItems.forEach(val => {
+  private handleMenuClick(label: string, node: INode) {
+    this.state.contextItems.forEach(val => {
       if (val.label === label) {
         val.click(node);
         return;
@@ -140,32 +140,37 @@ class NodesBodyPanel extends React.Component<Props, State> {
     return { item: { label, click: confirm, enabled: true } };
   }
 
-  private startLocalNode(): MenuItemType {
-    const label = 'Start local node';
-    const confirm = () => {
-      // Todo:
-      this.forceUpdate();
-    };
-    return { item: { label, click: confirm, enabled: true } };
-  }
-
-  private stopLocalNode(): MenuItemType {
-    const label = 'Stop local node';
-    const confirm = () => {
-      // Todo:
-      this.forceUpdate();
-    };
-    return { item: { label, click: confirm, enabled: true } };
-  }
-
-  private clearChainData(): MenuItemType {
-    const label = 'Clear chain data';
-    const confirm = () => {
-      // Todo:
-      this.forceUpdate();
-    };
-    return { item: { label, click: confirm, enabled: true } };
-  }
+  // private startLocalNode(): MenuItemType {
+  //   const label = 'Start local node';
+  //   const confirm = () => {
+  //     const packages = atom.packages.getActivePackages();
+  //     const pkg = packages.find(val => val.name === "atom-ide-terminal");
+  //     if (!pkg) {
+  //       atom.notifications.addError("Atom IDE Terminal not installed");
+  //       return;
+  //     }
+  //     console.log(pkg);
+  //   };
+  //   return { item: { label, click: confirm, enabled: true } };
+  // }
+  //
+  // private stopLocalNode(): MenuItemType {
+  //   const label = 'Stop local node';
+  //   const confirm = () => {
+  //     // Todo:
+  //     this.forceUpdate();
+  //   };
+  //   return { item: { label, click: confirm, enabled: true } };
+  // }
+  //
+  // private clearChainData(): MenuItemType {
+  //   const label = 'Clear chain data';
+  //   const confirm = () => {
+  //     // Todo:
+  //     this.forceUpdate();
+  //   };
+  //   return { item: { label, click: confirm, enabled: true } };
+  // }
 
   private getModalClick(label: string) {
     return () => {
@@ -204,6 +209,12 @@ class NodesBodyPanel extends React.Component<Props, State> {
     const path = Path.join(pkgPath, "substrate-plugin", "assets", "types.json");
     return path;
   }
+
+  // private getLocalNodeScript(): string {
+  //   const pkgPath = atom.packages.getPackageDirPaths()[0];
+  //   const path = Path.join(pkgPath, "substrate-plugin", "assets", "local_node.js");
+  //   return path;
+  // }
 
   private async openTypesEditor(data: string) {
     const path = this.getTypesPath();

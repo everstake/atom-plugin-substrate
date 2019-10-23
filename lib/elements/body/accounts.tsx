@@ -8,7 +8,7 @@ import { KeypairType } from "@polkadot/util-crypto/types";
 import * as clipboard from 'clipboardy';
 
 import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
-import { AccountComponent, ContextItem } from "../../components/accounts";
+import { AccountComponent, ContextItem } from "../../components/accounts/account";
 import { AddAccount } from "../../components/accounts/modals/addAccount";
 import { ImportAccount } from "../../components/accounts/modals/importAccount";
 import { RenameAccount } from "../../components/accounts/modals/RenameAccount";

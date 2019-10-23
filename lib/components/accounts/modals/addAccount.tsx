@@ -124,6 +124,10 @@ export class AddAccount extends React.Component<Props, State> {
 
   private handleConfirm(_: React.MouseEvent) {
     const { name, keypairType, seed, pass } = this.state;
+    if (!name.trim().length) {
+      atom.notifications.addError("Invalid account name");
+      return;
+    }
     const pairType = keypairType.items[keypairType.selected].label;
     this.props.confirmClick(name, pairType as KeypairType, seed, pass);
     this.props.closeModal();
