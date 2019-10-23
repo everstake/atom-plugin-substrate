@@ -45,7 +45,7 @@ export class NodeComponent extends React.Component<Props, State> {
     const pkgPath = atom.packages.getPackageDirPaths()[0];
     const path = Path.join(pkgPath, "substrate-plugin", "assets", "dark", "node.svg");
     return (
-      <li className="node">
+      <li className="node" onClick={() => this.state.itemMenu.menu.popup({})}>
         <img className="icon" src={path} />
         <span className="name">{this.props.node.name}</span>
         <span className="url">{this.props.node.endpoint}</span>

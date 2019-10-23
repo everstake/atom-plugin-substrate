@@ -1,10 +1,13 @@
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 import {
+  INode,
   SubstrateActionTypes,
   IAddAccountSubstrateAction,
   IRemoveAccountSubstrateAction,
   IRenameAccountSubstrateAction,
   IAddNodeSubstrateAction,
+  IRemoveNodeSubstrateAction,
+  IEditNodeSubstrateAction,
 } from "./types";
 
 /* Accounts */
@@ -36,5 +39,19 @@ export function addNode(name: string, endpoint: string): IAddNodeSubstrateAction
   return {
     type: SubstrateActionTypes.ADD_NODE,
     payload: { name, endpoint },
+  };
+}
+
+export function removeNode(name: string): IRemoveNodeSubstrateAction {
+  return {
+    type: SubstrateActionTypes.REMOVE_NODE,
+    payload: name,
+  };
+}
+
+export function editNode(oldName: string, node: INode): IEditNodeSubstrateAction {
+  return {
+    type: SubstrateActionTypes.EDIT_NODE,
+    payload: { oldName, node },
   };
 }

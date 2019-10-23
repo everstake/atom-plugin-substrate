@@ -20,6 +20,8 @@ export enum SubstrateActionTypes {
   RENAME_ACCOUNT = "RENAME_ACCOUNT",
   /* Nodes */
   ADD_NODE = "ADD_NODE",
+  REMOVE_NODE = "REMOVE_NODE",
+  EDIT_NODE = "EDIT_NODE",
 }
 
 export interface IBaseAction {
@@ -48,4 +50,14 @@ export interface IRenameAccountSubstrateAction extends IBaseAction {
 export interface IAddNodeSubstrateAction extends IBaseAction {
   type: SubstrateActionTypes.ADD_NODE;
   payload: INode;
+}
+
+export interface IRemoveNodeSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.REMOVE_NODE;
+  payload: string;
+}
+
+export interface IEditNodeSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.EDIT_NODE;
+  payload: { oldName: string, node: INode };
 }

@@ -1,16 +1,17 @@
 import * as React from "react";
-import { Menu as MenuType, remote } from "electron";
+import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 
 import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
 import { NodeComponent, ContextItem } from "../../components/nodes";
 import { AddNode } from "../../components/nodes/modals/addNode";
+import { EditNode } from "../../components/nodes/modals/editNode";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
 import { INode, SubstrateState } from "../../store/modules/substrate/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
-import { addNode } from "../../store/modules/substrate/actions";
+import { addNode, removeNode, editNode } from "../../store/modules/substrate/actions";
 
 const { Menu, MenuItem } = remote;
 
@@ -20,6 +21,8 @@ export type Props = {
   substrate: SubstrateState,
   togglePanel: typeof togglePanel,
   addNode: typeof addNode,
+  removeNode: typeof removeNode,
+  editNode: typeof editNode,
 };
 
 type State = {
@@ -38,7 +41,13 @@ class NodesBodyPanel extends React.Component<Props, State> {
       menuItems: [],
     },
 
-    nodeContextItems: [],
+    nodeContextItems: [{
+      label: "Remove node",
+      click: this.removeNode.bind(this),
+    }, {
+      label: "Edit node",
+      click: this.editNode.bind(this),
+    }],
   };
 
   componentDidMount() {
@@ -83,15 +92,15 @@ class NodesBodyPanel extends React.Component<Props, State> {
   private initMenuItems(): MenuItemType[] {
     const menuItems = [];
     menuItems.push(this.addNode());
+    menuItems.push({ item: { type: "separator" } as MenuItemConstructorOptions });
+    menuItems.push(this.editTypes());
+    menuItems.push(this.disconnectFromNode());
+    menuItems.push({ item: { type: "separator" } as MenuItemConstructorOptions });
+    menuItems.push(this.startLocalNode());
+    menuItems.push(this.stopLocalNode());
+    menuItems.push(this.clearChainData());
     return menuItems;
   }
-
-  //     label: 'Disconnect from node',
-  //     label: 'Edit types',
-  //   menu.append(new MenuItem({ type: "separator" }));
-  //     label: 'Start local node',
-  //     label: 'Stop local node',
-  //     label: 'Clear chain data',
 
   private handleAccountMenuClick(label: string, node: INode) {
     this.state.nodeContextItems.forEach(val => {
@@ -111,6 +120,51 @@ class NodesBodyPanel extends React.Component<Props, State> {
     return initModal(label, true, AddNode, confirm, this.getModalClick(label));
   }
 
+  private editTypes(): MenuItemType {
+    const label = 'Edit types';
+    const confirm = () => {
+      // Todo:
+      this.forceUpdate();
+    };
+    return { item: { label, click: confirm, enabled: true } };
+  }
+
+  private disconnectFromNode(): MenuItemType {
+    const label = 'Disconnect from node';
+    const confirm = () => {
+      // Todo:
+      this.forceUpdate();
+    };
+    return { item: { label, click: confirm, enabled: true } };
+  }
+
+  private startLocalNode(): MenuItemType {
+    const label = 'Start local node';
+    const confirm = () => {
+      // Todo:
+      this.forceUpdate();
+    };
+    return { item: { label, click: confirm, enabled: true } };
+  }
+
+  private stopLocalNode(): MenuItemType {
+    const label = 'Stop local node';
+    const confirm = () => {
+      // Todo:
+      this.forceUpdate();
+    };
+    return { item: { label, click: confirm, enabled: true } };
+  }
+
+  private clearChainData(): MenuItemType {
+    const label = 'Clear chain data';
+    const confirm = () => {
+      // Todo:
+      this.forceUpdate();
+    };
+    return { item: { label, click: confirm, enabled: true } };
+  }
+
   private getModalClick(label: string) {
     return () => {
       const menuItems = this.state.tabMenu.menuItems;
@@ -126,12 +180,21 @@ class NodesBodyPanel extends React.Component<Props, State> {
     };
   }
 
-  // private async removeNode(node: INode) {
-  //   const mod = initAccountContextItemModal(RemoveNode, { pair }, (name: string) => {
-  //     this.props.renameAccount(pair.meta.name, name);
-  //   }, () => mod.hide());
-  //   mod.show();
-  // }
+  private removeNode(node: INode) {
+    this.props.removeNode(node.name);
+    this.forceUpdate();
+  }
+
+  private async editNode(oldNode: INode) {
+    const mod = initAccountContextItemModal(
+      EditNode, { node: oldNode },
+      (node: INode) => {
+        this.props.editNode(oldNode.name, node);
+      },
+      () => mod.hide(),
+    );
+    mod.show();
+  }
 }
 
 const mapStateToProps = (state: AppState) => ({
@@ -141,5 +204,5 @@ const mapStateToProps = (state: AppState) => ({
 
 export default connect(
   mapStateToProps,
-  { togglePanel, addNode }
+  { togglePanel, addNode, removeNode, editNode }
 )(NodesBodyPanel);

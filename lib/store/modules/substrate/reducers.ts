@@ -5,13 +5,17 @@ import {
   IRemoveAccountSubstrateAction,
   IRenameAccountSubstrateAction,
   IAddNodeSubstrateAction,
+  IRemoveNodeSubstrateAction,
+  IEditNodeSubstrateAction,
 } from "./types";
 
 export type ActionTypes =
   | IAddAccountSubstrateAction
   | IRemoveAccountSubstrateAction
   | IRenameAccountSubstrateAction
-  | IAddNodeSubstrateAction;
+  | IAddNodeSubstrateAction
+  | IRemoveNodeSubstrateAction
+  | IEditNodeSubstrateAction;
 
 const initialState: SubstrateState = {
   isConnected: false,
@@ -55,6 +59,7 @@ function accountsReducer(
       const accounts = state.accounts || [];
       const index = accounts.findIndex((val) => val.meta['name'] === action.payload);
       if (index === -1) {
+        atom.notifications.addError("Account not found");
         return state;
       }
       accounts.splice(index, 1);
@@ -90,6 +95,26 @@ function nodesReducer(
         return state;
       }
       nodes.push(action.payload);
+      return { ...state, nodes };
+    }
+    case SubstrateActionTypes.REMOVE_NODE: {
+      const nodes = state.nodes || [];
+      const index = nodes.findIndex((val) => val.name === action.payload);
+      if (index === -1) {
+        atom.notifications.addError("Node not found");
+        return state;
+      }
+      nodes.splice(index, 1);
+      return { ...state, nodes };
+    }
+    case SubstrateActionTypes.EDIT_NODE: {
+      const nodes = state.nodes || [];
+      const index = nodes.findIndex((val) => val.name === action.payload.oldName);
+      if (index === -1) {
+        atom.notifications.addError("Node not found");
+        return state;
+      }
+      nodes[index] = action.payload.node;
       return { ...state, nodes };
     }
     default:
