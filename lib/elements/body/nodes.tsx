@@ -1,4 +1,6 @@
 import * as React from "react";
+import * as fs from "fs";
+import * as Path from "path";
 import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 
@@ -122,9 +124,9 @@ class NodesBodyPanel extends React.Component<Props, State> {
 
   private editTypes(): MenuItemType {
     const label = 'Edit types';
-    const confirm = () => {
-      // Todo:
-      this.forceUpdate();
+    const confirm = async () => {
+      const types = await this.getTypes();
+      await this.openTypesEditor(types);
     };
     return { item: { label, click: confirm, enabled: true } };
   }
@@ -194,6 +196,31 @@ class NodesBodyPanel extends React.Component<Props, State> {
       () => mod.hide(),
     );
     mod.show();
+  }
+
+  // Todo: Move to helper
+  private getTypesPath(): string {
+    const pkgPath = atom.packages.getPackageDirPaths()[0];
+    const path = Path.join(pkgPath, "substrate-plugin", "assets", "types.json");
+    return path;
+  }
+
+  private async openTypesEditor(data: string) {
+    const path = this.getTypesPath();
+    try {
+      await fs.promises.writeFile(path, data, "utf8");
+    } catch (err) {}
+    await atom.workspace.open(path, {});
+  }
+
+  private async getTypes(): Promise<string> {
+    const path = this.getTypesPath();
+    try {
+      const buf = await fs.promises.readFile(path);
+      return buf.toString();
+    } catch (err) {
+      return "{}\n";
+    }
   }
 }
 
