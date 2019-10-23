@@ -1,9 +1,9 @@
 import * as React from "react";
 import { remote } from "electron";
 
-import { ModalComponent } from "../../components/modal";
-import { FileInputComponent } from "../../components/inputs/file";
-import { DefaultButtonComponent } from "../../components/buttons/default";
+import { ModalComponent } from "../../modal";
+import { FileInputComponent } from "../../inputs/file";
+import { DefaultButtonComponent } from "../../buttons/default";
 
 export interface Props {
   closeModal: () => void;

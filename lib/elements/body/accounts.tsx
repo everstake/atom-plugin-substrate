@@ -1,18 +1,17 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import * as fs from "fs";
-import { Panel } from "atom";
-import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
+import { Menu as MenuType, remote } from "electron";
 import { connect } from "react-redux";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 import { KeypairType } from "@polkadot/util-crypto/types";
 import * as clipboard from 'clipboardy';
 
+import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
 import { AccountComponent, ContextItem } from "../../components/accounts";
-import { AddAccount } from "../modals/addAccount";
-import { ImportAccount } from "../modals/importAccount";
-import { RenameAccount } from "../modals/RenameAccount";
+import { AddAccount } from "../../components/accounts/modals/addAccount";
+import { ImportAccount } from "../../components/accounts/modals/importAccount";
+import { RenameAccount } from "../../components/accounts/modals/RenameAccount";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -20,11 +19,6 @@ import { addAccount, removeAccount, renameAccount } from "../../store/modules/su
 import { togglePanel } from "../../store/modules/tabs/actions";
 
 const { Menu, MenuItem, dialog } = remote;
-
-interface MenuItem {
-  item: MenuItemConstructorOptions,
-  modal?: Panel;
-};
 
 export type Props = {
   id: number,
@@ -39,7 +33,7 @@ export type Props = {
 type State = {
   tabMenu: {
     menu: MenuType,
-    menuItems: MenuItem[],
+    menuItems: MenuItemType[],
   },
 
   accountContextItems: ContextItem[],
@@ -60,14 +54,14 @@ class AccountsBodyPanel extends React.Component<Props, State> {
       label: "Copy address",
       click: this.copyAddress.bind(this),
     }, {
+      label: "Rename account",
+      click: this.renameAccount.bind(this),
+    }, {
       label: "Remove account",
       click: this.removeAccount.bind(this),
     }, {
       label: "Export account",
       click: this.exportAccount.bind(this),
-    }, {
-      label: "Rename account",
-      click: this.renameAccount.bind(this),
     }],
     accountInput: { name: "", key: "" },
   };
@@ -110,20 +104,28 @@ class AccountsBodyPanel extends React.Component<Props, State> {
     );
   }
 
-  private initMenuItems(): MenuItem[] {
+  private initMenuItems(): MenuItemType[] {
     const menuItems = [];
-    menuItems.push(this.initModal('Add account', true, AddAccount, (
-      name: string,
-      keypairType: KeypairType,
-      seed: string,
-      pass: string,
-    ) => {
+    menuItems.push(this.addAccount());
+    menuItems.push(this.importAccount());
+    return menuItems;
+  }
+
+  private addAccount(): MenuItemType {
+    const label = 'Add account';
+    const confirm = (name: string, keypairType: KeypairType, seed: string, pass: string) => {
       const keyring = new Keyring({ type: keypairType });
       const pair = keyring.addFromUri(seed, { name }, keypairType);
       const json = pair.toJson(pass);
       this.props.addAccount(json);
-    }));
-    menuItems.push(this.initModal('Import acccount', true, ImportAccount, (path: string) => {
+      this.forceUpdate();
+    };
+    return initModal(label, true, AddAccount, confirm, this.getModalClick(label));
+  }
+
+  private importAccount(): MenuItemType {
+    const label = 'Import acccount';
+    const confirm = (path: string) => {
       const rawdata = fs.readFileSync(path);
       const pair: KeyringPair$Json = JSON.parse(rawdata.toString());
       const exKey = this.props.accounts.find((val) => val.meta.name === name);
@@ -132,13 +134,13 @@ class AccountsBodyPanel extends React.Component<Props, State> {
         return;
       }
       this.props.addAccount(pair);
-    }));
-    return menuItems;
+      this.forceUpdate();
+    };
+    return initModal(label, true, ImportAccount, confirm, this.getModalClick(label));
   }
 
-  // Todo: Move to helper folder
-  private initModal(label: string, enabled: boolean, component: any, confirmClick: any): MenuItem {
-    const click = () => {
+  private getModalClick(label: string) {
+    return () => {
       const menuItems = this.state.tabMenu.menuItems;
       const item = menuItems.find(val => val.item.label === label);
       if (!item) {
@@ -150,31 +152,6 @@ class AccountsBodyPanel extends React.Component<Props, State> {
       }
       modal.visible ? modal.hide() : modal.show();
     };
-    const modal = document.createElement("div");
-    ReactDOM.render(React.createElement(component, {
-      closeModal: click,
-      confirmClick,
-    }), modal);
-    return {
-      item: { label, click, enabled },
-      modal: atom.workspace.addModalPanel({
-        item: modal,
-        visible: false,
-      }),
-    };
-  }
-
-  private initAccountContextItemModal(component: any, props: any, confirmClick: any, click: () => void): Panel {
-    const modal = document.createElement("div");
-    ReactDOM.render(React.createElement(component, {
-      closeModal: click,
-      confirmClick,
-      ...props,
-    }), modal);
-    return atom.workspace.addModalPanel({
-      item: modal,
-      visible: false,
-    });
   }
 
   private handleAccountMenuClick(label: string, pair: KeyringPair$Json) {
@@ -204,7 +181,7 @@ class AccountsBodyPanel extends React.Component<Props, State> {
   }
 
   private async renameAccount(pair: KeyringPair$Json) {
-    const mod = this.initAccountContextItemModal(RenameAccount, { pair }, (name: string) => {
+    const mod = initAccountContextItemModal(RenameAccount, { pair }, (name: string) => {
       this.props.renameAccount(pair.meta.name, name);
     }, () => mod.hide());
     mod.show();

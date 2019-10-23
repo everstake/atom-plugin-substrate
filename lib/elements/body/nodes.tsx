@@ -2,31 +2,52 @@ import * as React from "react";
 import { Menu as MenuType, remote } from "electron";
 import { connect } from "react-redux";
 
-import { NodeComponent } from "../../components/nodes";
+import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
+import { NodeComponent, ContextItem } from "../../components/nodes";
+import { AddNode } from "../../components/nodes/modals/addNode";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
+import { INode, SubstrateState } from "../../store/modules/substrate/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
+import { addNode } from "../../store/modules/substrate/actions";
 
 const { Menu, MenuItem } = remote;
 
 export type Props = {
   id: number,
   tabs: TabsState,
+  substrate: SubstrateState,
   togglePanel: typeof togglePanel,
+  addNode: typeof addNode,
 };
 
 type State = {
-  menu: MenuType,
+  tabMenu: {
+    menu: MenuType,
+    menuItems: MenuItemType[],
+  },
+
+  nodeContextItems: ContextItem[],
 };
 
 class NodesBodyPanel extends React.Component<Props, State> {
   public state: State = {
-    menu: new Menu(),
+    tabMenu: {
+      menu: new Menu(),
+      menuItems: [],
+    },
+
+    nodeContextItems: [],
   };
 
   componentDidMount() {
-    this.initMenu();
+    const { tabMenu } = this.state;
+    tabMenu.menuItems = this.initMenuItems();
+    tabMenu.menuItems.forEach((val) => {
+      tabMenu.menu.append(new MenuItem(val.item));
+    });
+    this.setState({ tabMenu });
   }
 
   public render(): JSX.Element {
@@ -36,60 +57,89 @@ class NodesBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
+    const nds = this.props.substrate.nodes;
+    const nodes = nds.map((node: INode, index: number) => {
+      return (
+        <NodeComponent
+          key={index}
+          node={node}
+          accountContextItems={this.state.nodeContextItems}
+          onClick={this.handleAccountMenuClick.bind(this)}
+        />
+      );
+    });
     return (
       <TabComponent
         className="nodes"
         panel={val}
         onTabClick={() => this.props.togglePanel(val.id)}
-        onActionsClick={() => this.state.menu.popup({})}
+        onActionsClick={() => this.state.tabMenu.menu.popup({})}
       >
-        <NodeComponent name={"Default"} url={"ws://127.0.0.1:9944"} />
-        <NodeComponent name={"Example"} url={"wss://poc3.example.com"} />
+        {nodes}
       </TabComponent>
     );
   }
 
-  private initMenu() {
-    const menu = this.state.menu;
-    menu.append(new MenuItem({
-      label: 'Add node',
-      click: () => console.log(1),
-      enabled: true,
-    }));
-    menu.append(new MenuItem({
-      label: 'Start local node',
-      click: () => console.log(2),
-      enabled: true,
-    }));
-    menu.append(new MenuItem({
-      label: 'Stop local node',
-      click: () => console.log(3),
-      enabled: true,
-    }));
-    menu.append(new MenuItem({
-      label: 'Clear chain data',
-      click: () => console.log(4),
-      enabled: true,
-    }));
-    menu.append(new MenuItem({
-      label: 'Disconnect from node',
-      click: () => console.log(5),
-      enabled: true,
-    }));
-    menu.append(new MenuItem({
-      label: 'Edit types',
-      click: () => console.log(6),
-      enabled: true,
-    }));
-    this.setState({ menu });
+  private initMenuItems(): MenuItemType[] {
+    const menuItems = [];
+    menuItems.push(this.addNode());
+    return menuItems;
   }
+
+  //     label: 'Disconnect from node',
+  //     label: 'Edit types',
+  //   menu.append(new MenuItem({ type: "separator" }));
+  //     label: 'Start local node',
+  //     label: 'Stop local node',
+  //     label: 'Clear chain data',
+
+  private handleAccountMenuClick(label: string, node: INode) {
+    this.state.nodeContextItems.forEach(val => {
+      if (val.label === label) {
+        val.click(node);
+        return;
+      }
+    })
+  }
+
+  private addNode(): MenuItemType {
+    const label = 'Add node';
+    const confirm = (name: string, endpoint: string) => {
+      this.props.addNode(name, endpoint);
+      this.forceUpdate();
+    };
+    return initModal(label, true, AddNode, confirm, this.getModalClick(label));
+  }
+
+  private getModalClick(label: string) {
+    return () => {
+      const menuItems = this.state.tabMenu.menuItems;
+      const item = menuItems.find(val => val.item.label === label);
+      if (!item) {
+        return console.error("Invalid item");
+      }
+      const modal = item.modal;
+      if (!modal) {
+        return;
+      }
+      modal.visible ? modal.hide() : modal.show();
+    };
+  }
+
+  // private async removeNode(node: INode) {
+  //   const mod = initAccountContextItemModal(RemoveNode, { pair }, (name: string) => {
+  //     this.props.renameAccount(pair.meta.name, name);
+  //   }, () => mod.hide());
+  //   mod.show();
+  // }
 }
 
 const mapStateToProps = (state: AppState) => ({
   tabs: state.tabs,
+  substrate: state.substrate,
 });
 
 export default connect(
   mapStateToProps,
-  { togglePanel }
+  { togglePanel, addNode }
 )(NodesBodyPanel);

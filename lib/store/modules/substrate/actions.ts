@@ -4,7 +4,10 @@ import {
   IAddAccountSubstrateAction,
   IRemoveAccountSubstrateAction,
   IRenameAccountSubstrateAction,
+  IAddNodeSubstrateAction,
 } from "./types";
+
+/* Accounts */
 
 export function addAccount(account: KeyringPair$Json): IAddAccountSubstrateAction {
   return {
@@ -24,5 +27,14 @@ export function renameAccount(oldName: string, newName: string): IRenameAccountS
   return {
     type: SubstrateActionTypes.RENAME_ACCOUNT,
     payload: { oldName, newName },
+  };
+}
+
+/* Nodes */
+
+export function addNode(name: string, endpoint: string): IAddNodeSubstrateAction {
+  return {
+    type: SubstrateActionTypes.ADD_NODE,
+    payload: { name, endpoint },
   };
 }

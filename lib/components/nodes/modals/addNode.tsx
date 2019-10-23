@@ -1,34 +1,26 @@
 import * as React from "react";
-import { KeyringPair$Json } from "@polkadot/keyring/types";
 
-import { ModalComponent } from "../../components/modal";
-import { DefaultButtonComponent } from "../../components/buttons/default";
-import { TextInputComponent } from "../../components/inputs/text";
+import { ModalComponent } from "../../modal";
+import { DefaultButtonComponent } from "../../buttons/default";
+import { TextInputComponent } from "../../inputs/text";
 
 export type Props = {
-  pair: KeyringPair$Json;
   closeModal: () => void;
-  confirmClick: (
-    name: string,
-  ) => void;
+  confirmClick: (name: string, endpoint: string) => void;
 };
 
 type State = {
   name: string,
+  endpoint: string,
 };
 
 const DefaultState: State = {
-  name: "",
+  name: "Default",
+  endpoint: "ws://127.0.0.1:9944",
 };
 
-export class RenameAccount extends React.Component<Props, State> {
+export class AddNode extends React.Component<Props, State> {
   public state: State = DefaultState;
-
-  componentDidMount() {
-    this.setState({
-      name: this.props.pair.meta.name,
-    });
-  }
 
   public render(): JSX.Element {
     return (
@@ -36,10 +28,18 @@ export class RenameAccount extends React.Component<Props, State> {
         <TextInputComponent
           className="name"
           type="text"
-          title="Account name"
-          placeholder="Alice"
+          title="Node name"
+          placeholder="Default"
           value={this.state.name}
           onChange={(val: string) => this.setState({ name: val })}
+        />
+        <TextInputComponent
+          className="endpoint"
+          type="text"
+          title="Node endpoint"
+          placeholder="ws://127.0.0.1:9944"
+          value={this.state.endpoint}
+          onChange={(val: string) => this.setState({ endpoint: val })}
         />
         <div className="buttons">
           <DefaultButtonComponent
@@ -49,7 +49,7 @@ export class RenameAccount extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Rename account"
+            title="Add account"
             onClick={this.handleConfirm.bind(this)}
           />
         </div>
@@ -58,7 +58,8 @@ export class RenameAccount extends React.Component<Props, State> {
   }
 
   private handleConfirm(_: React.MouseEvent) {
-    this.props.confirmClick(this.state.name);
+    const { name, endpoint } = this.state;
+    this.props.confirmClick(name, endpoint);
     this.props.closeModal();
     this.setState(DefaultState);
   }

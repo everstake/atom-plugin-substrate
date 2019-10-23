@@ -6,6 +6,7 @@ import * as Path from "path";
 import { SidebarPanel, Props } from "./elements/sidebar";
 import configureStore from "./store";
 import { setPanels } from "./store/modules/tabs/actions";
+import { addNode } from "./store/modules/substrate/actions";
 
 type State = {
   reduxState: string,
@@ -83,7 +84,7 @@ module.exports = new class SubstratePlugin {
       this.props.store = configureStore(reduxState);
     }
     if (!this.props.store.getState().tabs.panels.length) {
-      const action = setPanels([{
+      const setPanelsAction = setPanels([{
         id: 0,
         title: "My node connections",
         closed: false,
@@ -96,7 +97,11 @@ module.exports = new class SubstratePlugin {
         title: "Available extrinsics",
         closed: false,
       }]);
-      this.props.store.dispatch(action);
+      this.props.store.dispatch(setPanelsAction);
+    }
+    if (!this.props.store.getState().substrate.nodes.length) {
+      const addNodeAction = addNode("Default", "ws://127.0.0.1:9944");
+      this.props.store.dispatch(addNodeAction);
     }
   }
 

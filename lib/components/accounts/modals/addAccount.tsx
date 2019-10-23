@@ -3,10 +3,10 @@ import { mnemonicGenerate, randomAsU8a } from "@polkadot/util-crypto";
 import { KeypairType } from "@polkadot/util-crypto/types";
 import { u8aToHex } from "@polkadot/util";
 
-import { ModalComponent } from "../../components/modal";
-import { DefaultButtonComponent } from "../../components/buttons/default";
-import { TextInputComponent } from "../../components/inputs/text";
-import { SelectInputComponent, Item } from "../../components/inputs/select";
+import { ModalComponent } from "../../modal";
+import { DefaultButtonComponent } from "../../buttons/default";
+import { TextInputComponent } from "../../inputs/text";
+import { SelectInputComponent, Item } from "../../inputs/select";
 
 export type Props = {
   closeModal: () => void;
