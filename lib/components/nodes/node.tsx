@@ -11,17 +11,20 @@ export interface ContextItem {
   click: (node: INode) => void;
 }
 
-export type Props = {
-  node: INode,
-  accountContextItems: ContextItem[],
-  onClick: (label: string, node: INode) => void,
+export interface Props {
+  isConnected: boolean;
+  isSelected: boolean;
+
+  node: INode;
+  accountContextItems: ContextItem[];
+  onClick: (label: string, node: INode) => void;
 };
 
-type State = {
+interface State {
   itemMenu: {
-    menu: MenuType,
-    menuItems: MenuItemType[],
-  },
+    menu: MenuType;
+    menuItems: MenuItemType[];
+  };
 };
 
 export class NodeComponent extends React.Component<Props, State> {
@@ -43,7 +46,16 @@ export class NodeComponent extends React.Component<Props, State> {
 
   public render(): JSX.Element {
     const pkgPath = atom.packages.getPackageDirPaths()[0];
-    const path = Path.join(pkgPath, "substrate-plugin", "assets", "dark", "node.svg");
+    let path = Path.join(pkgPath, "substrate-plugin", "assets", "dark");
+    if (this.props.isSelected) {
+      if (this.props.isConnected) {
+        path = Path.join(path, "connected.svg");
+      } else {
+        path = Path.join(path, "disconnected.svg");
+      }
+    } else {
+      path = Path.join(path, "node.svg");
+    }
     return (
       <li className="node" onClick={() => this.state.itemMenu.menu.popup({})}>
         <img className="icon" src={path} />

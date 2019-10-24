@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as fs from "fs";
-import * as Path from "path";
 import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 
+import { getTypesPath } from "../helpers";
 import { initMenuItem, initAccountContextItemModal } from "../../components/modal";
 import { NodeComponent, ContextItem } from "../../components/nodes/node";
 import { AddNode } from "../../components/nodes/modals/addNode";
@@ -11,26 +11,31 @@ import { EditNode } from "../../components/nodes/modals/editNode";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
-import { INode, SubstrateState } from "../../store/modules/substrate/types";
+import { INode } from "../../store/modules/substrate/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
-import { addNode, removeNode, editNode } from "../../store/modules/substrate/actions";
+import { addNode, removeNode, editNode, updateConnectedNode } from "../../store/modules/substrate/actions";
 
 const { Menu, MenuItem } = remote;
 
-export type Props = {
-  id: number,
-  tabs: TabsState,
-  substrate: SubstrateState,
-  togglePanel: typeof togglePanel,
-  addNode: typeof addNode,
-  removeNode: typeof removeNode,
-  editNode: typeof editNode,
+export interface Props {
+  id: number;
+
+  tabs: TabsState;
+  nodes: INode[];
+  isConnected: boolean;
+  connectedNode?: string;
+
+  togglePanel: typeof togglePanel;
+  addNode: typeof addNode;
+  removeNode: typeof removeNode;
+  editNode: typeof editNode;
+  updateConnectedNode: typeof updateConnectedNode;
 };
 
-type State = {
-  tabMenu: MenuType,
+interface State {
+  tabMenu: MenuType;
 
-  contextItems: ContextItem[],
+  contextItems: ContextItem[];
 };
 
 class NodesBodyPanel extends React.Component<Props, State> {
@@ -38,6 +43,9 @@ class NodesBodyPanel extends React.Component<Props, State> {
     tabMenu: new Menu(),
 
     contextItems: [{
+      label: "Connect to node",
+      click: this.connectToNode.bind(this),
+    }, {
       label: "Remove node",
       click: this.removeNode.bind(this),
     }, {
@@ -66,12 +74,14 @@ class NodesBodyPanel extends React.Component<Props, State> {
     if (!val) {
       return <span>Invalid tabs</span>;
     }
-    const nds = this.props.substrate.nodes;
+    const nds = this.props.nodes;
     const nodes = nds.map((node: INode, index: number) => {
       return (
         <NodeComponent
           key={index}
           node={node}
+          isSelected={this.props.connectedNode === node.name}
+          isConnected={this.props.isConnected}
           accountContextItems={this.state.contextItems}
           onClick={this.handleMenuClick.bind(this)}
         />
@@ -119,7 +129,7 @@ class NodesBodyPanel extends React.Component<Props, State> {
   private disconnectFromNode(): MenuItemConstructorOptions {
     const label = 'Disconnect from node';
     const confirm = () => {
-      // Todo:
+      this.props.updateConnectedNode(undefined);
       this.forceUpdate();
     };
     return { label, click: confirm, enabled: true };
@@ -162,6 +172,11 @@ class NodesBodyPanel extends React.Component<Props, State> {
     this.forceUpdate();
   }
 
+  private connectToNode(node: INode) {
+    this.props.updateConnectedNode(node.name);
+    this.forceUpdate();
+  }
+
   private async editNode(oldNode: INode) {
     const mod = initAccountContextItemModal(
       EditNode, { node: oldNode },
@@ -173,15 +188,8 @@ class NodesBodyPanel extends React.Component<Props, State> {
     mod.show();
   }
 
-  // Todo: Move to helper
-  private getTypesPath(): string {
-    const pkgPath = atom.packages.getPackageDirPaths()[0];
-    const path = Path.join(pkgPath, "substrate-plugin", "assets", "types.json");
-    return path;
-  }
-
   private async openTypesEditor(data: string) {
-    const path = this.getTypesPath();
+    const path = getTypesPath();
     try {
       await fs.promises.writeFile(path, data, "utf8");
     } catch (err) {}
@@ -189,7 +197,7 @@ class NodesBodyPanel extends React.Component<Props, State> {
   }
 
   private async getTypes(): Promise<string> {
-    const path = this.getTypesPath();
+    const path = getTypesPath();
     try {
       const buf = await fs.promises.readFile(path);
       return buf.toString();
@@ -201,10 +209,12 @@ class NodesBodyPanel extends React.Component<Props, State> {
 
 const mapStateToProps = (state: AppState) => ({
   tabs: state.tabs,
-  substrate: state.substrate,
+  nodes: state.substrate.nodes,
+  isConnected: state.substrate.isConnected,
+  connectedNode: state.substrate.connectedNode,
 });
 
 export default connect(
   mapStateToProps,
-  { togglePanel, addNode, removeNode, editNode }
+  { togglePanel, addNode, removeNode, editNode, updateConnectedNode }
 )(NodesBodyPanel);

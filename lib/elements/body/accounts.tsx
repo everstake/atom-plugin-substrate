@@ -20,24 +20,24 @@ import { togglePanel } from "../../store/modules/tabs/actions";
 
 const { Menu, MenuItem, dialog } = remote;
 
-export type Props = {
-  id: number,
-  tabs: TabsState,
-  accounts: KeyringPair$Json[],
-  togglePanel: typeof togglePanel,
-  addAccount: typeof addAccount,
-  removeAccount: typeof removeAccount,
-  renameAccount: typeof renameAccount,
+export interface Props {
+  id: number;
+  tabs: TabsState;
+  accounts: KeyringPair$Json[];
+  togglePanel: typeof togglePanel;
+  addAccount: typeof addAccount;
+  removeAccount: typeof removeAccount;
+  renameAccount: typeof renameAccount;
 };
 
-type State = {
-  tabMenu: MenuType,
+interface State {
+  tabMenu: MenuType;
 
-  accountContextItems: ContextItem[],
+  accountContextItems: ContextItem[];
   accountInput: {
     name: string;
     key: string;
-  },
+  };
 };
 
 class AccountsBodyPanel extends React.Component<Props, State> {

@@ -8,8 +8,10 @@ export interface INode {
 
 export interface SubstrateState {
   isConnected: boolean;
-  accounts: IAccount[],
-  nodes: INode[],
+  connectedNode?: string;
+
+  accounts: IAccount[];
+  nodes: INode[];
 }
 
 // Describing the different ACTION NAMES available
@@ -22,6 +24,10 @@ export enum SubstrateActionTypes {
   ADD_NODE = "ADD_NODE",
   REMOVE_NODE = "REMOVE_NODE",
   EDIT_NODE = "EDIT_NODE",
+  UPDATE_CONNECTED_NODE = "UPDATE_CONNECTED_NODE",
+  /* Connection */
+  CONNECT = "CONNECT",
+  DISCONNECT = "DISCONNECT",
 }
 
 export interface IBaseAction {
@@ -60,4 +66,19 @@ export interface IRemoveNodeSubstrateAction extends IBaseAction {
 export interface IEditNodeSubstrateAction extends IBaseAction {
   type: SubstrateActionTypes.EDIT_NODE;
   payload: { oldName: string, node: INode };
+}
+
+export interface IUpdateConnectedNodeSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.UPDATE_CONNECTED_NODE;
+  payload: string | undefined;
+}
+
+/* Connection */
+
+export interface IConnectSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.CONNECT;
+}
+
+export interface IDisonnectSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.DISCONNECT;
 }

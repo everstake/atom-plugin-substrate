@@ -7,6 +7,9 @@ import {
   IAddNodeSubstrateAction,
   IRemoveNodeSubstrateAction,
   IEditNodeSubstrateAction,
+  IUpdateConnectedNodeSubstrateAction,
+  IConnectSubstrateAction,
+  IDisonnectSubstrateAction,
 } from "./types";
 
 export type ActionTypes =
@@ -15,7 +18,10 @@ export type ActionTypes =
   | IRenameAccountSubstrateAction
   | IAddNodeSubstrateAction
   | IRemoveNodeSubstrateAction
-  | IEditNodeSubstrateAction;
+  | IEditNodeSubstrateAction
+  | IUpdateConnectedNodeSubstrateAction
+  | IConnectSubstrateAction
+  | IDisonnectSubstrateAction;
 
 const initialState: SubstrateState = {
   isConnected: false,
@@ -34,6 +40,10 @@ export function reducer(
   let nodesResult = nodesReducer(state, action);
   if (nodesResult) {
     return nodesResult;
+  }
+  let connectionsResult = connectionReducer(state, action);
+  if (connectionsResult) {
+    return connectionsResult;
   }
   return state;
 }
@@ -116,6 +126,25 @@ function nodesReducer(
       }
       nodes[index] = action.payload.node;
       return { ...state, nodes };
+    }
+    case SubstrateActionTypes.UPDATE_CONNECTED_NODE: {
+      return { ...state, connectedNode: action.payload };
+    }
+    default:
+      return null;
+  }
+}
+
+function connectionReducer(
+  state = initialState,
+  action: ActionTypes,
+): SubstrateState | null {
+  switch (action.type) {
+    case SubstrateActionTypes.CONNECT: {
+      return { ...state, isConnected: true };
+    }
+    case SubstrateActionTypes.DISCONNECT: {
+      return { ...state, isConnected: false };
     }
     default:
       return null;

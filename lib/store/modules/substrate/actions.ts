@@ -8,6 +8,9 @@ import {
   IAddNodeSubstrateAction,
   IRemoveNodeSubstrateAction,
   IEditNodeSubstrateAction,
+  IUpdateConnectedNodeSubstrateAction,
+  IConnectSubstrateAction,
+  IDisonnectSubstrateAction,
 } from "./types";
 
 /* Accounts */
@@ -53,5 +56,26 @@ export function editNode(oldName: string, node: INode): IEditNodeSubstrateAction
   return {
     type: SubstrateActionTypes.EDIT_NODE,
     payload: { oldName, node },
+  };
+}
+
+export function updateConnectedNode(name?: string): IUpdateConnectedNodeSubstrateAction {
+  return {
+    type: SubstrateActionTypes.UPDATE_CONNECTED_NODE,
+    payload: name,
+  };
+}
+
+/* Connection */
+
+export function connect(): IConnectSubstrateAction {
+  return {
+    type: SubstrateActionTypes.CONNECT,
+  };
+}
+
+export function disconnect(): IDisonnectSubstrateAction {
+  return {
+    type: SubstrateActionTypes.DISCONNECT,
   };
 }

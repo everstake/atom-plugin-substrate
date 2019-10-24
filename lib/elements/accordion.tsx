@@ -7,11 +7,11 @@ import NodesBodyPanel from "./body/nodes";
 import { AppState } from "../store";
 import { TabsState } from "../store/modules/tabs/types";
 
-export type Props = {
+export interface Props {
   tabs: TabsState,
 };
 
-type State = {};
+interface State {};
 
 class AccordionPanel extends React.Component<Props, State> {
   public render(): JSX.Element {
