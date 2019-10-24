@@ -3,17 +3,11 @@ import * as ReactDOM from "react-dom";
 import { Panel } from "atom";
 import { MenuItemConstructorOptions } from "electron";
 
-export interface MenuItemType {
-  item: MenuItemConstructorOptions;
-  modal?: Panel;
-  reactElement: React.ReactElement;
+export interface Props {
+  className: string;
 };
 
-export type Props = {
-  className: string,
-};
-
-type State = {};
+interface State {};
 
 export class ModalComponent extends React.Component<Props, State> {
   public state: State = {};
@@ -27,29 +21,24 @@ export class ModalComponent extends React.Component<Props, State> {
   }
 }
 
-export function initModal(
+export function initMenuItem(
   label: string,
   enabled: boolean,
   component: any,
   confirmClick: any,
-  click: any,
   props: any = {},
-): MenuItemType {
-  const modal = document.createElement("div");
-  const reactElement = React.createElement(component, {
-    closeModal: click,
-    confirmClick,
-    ...props,
-  });
-  ReactDOM.render(reactElement, modal);
-  return {
-    item: { label, click, enabled },
-    modal: atom.workspace.addModalPanel({
-      item: modal,
-      visible: false,
-    }),
-    reactElement,
+): MenuItemConstructorOptions {
+  const click = () => {
+    const modal = document.createElement("div");
+    const mod = atom.workspace.addModalPanel({ item: modal, visible: true });
+    const reactElement = React.createElement(component, {
+      closeModal: () => mod.destroy(),
+      confirmClick,
+      ...props,
+    });
+    ReactDOM.render(reactElement, modal);
   };
+  return { label, click, enabled };
 }
 
 export function initAccountContextItemModal(

@@ -1,13 +1,13 @@
 import * as React from "react";
 import * as fs from "fs";
-import { Menu as MenuType, remote } from "electron";
+import { Menu as MenuType, remote, MenuItemConstructorOptions } from "electron";
 import { connect } from "react-redux";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 import { KeypairType } from "@polkadot/util-crypto/types";
 import * as clipboard from 'clipboardy';
 
-import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
+import { initMenuItem, initAccountContextItemModal } from "../../components/modal";
 import { AccountComponent, ContextItem } from "../../components/accounts/account";
 import { AddAccount } from "../../components/accounts/modals/addAccount";
 import { ImportAccount } from "../../components/accounts/modals/importAccount";
@@ -31,10 +31,7 @@ export type Props = {
 };
 
 type State = {
-  tabMenu: {
-    menu: MenuType,
-    menuItems: MenuItemType[],
-  },
+  tabMenu: MenuType,
 
   accountContextItems: ContextItem[],
   accountInput: {
@@ -45,10 +42,7 @@ type State = {
 
 class AccountsBodyPanel extends React.Component<Props, State> {
   public state: State = {
-    tabMenu: {
-      menu: new Menu(),
-      menuItems: [],
-    },
+    tabMenu: new Menu(),
 
     accountContextItems: [{
       label: "Copy address",
@@ -68,10 +62,8 @@ class AccountsBodyPanel extends React.Component<Props, State> {
 
   componentDidMount() {
     const { tabMenu } = this.state;
-    tabMenu.menuItems = this.initMenuItems();
-    tabMenu.menuItems.forEach((val) => {
-      tabMenu.menu.append(new MenuItem(val.item));
-    });
+    tabMenu.append(new MenuItem(this.addAccount()));
+    tabMenu.append(new MenuItem(this.importAccount()));
     this.setState({ tabMenu });
   }
 
@@ -97,21 +89,14 @@ class AccountsBodyPanel extends React.Component<Props, State> {
         className="accounts"
         panel={val}
         onTabClick={() => this.props.togglePanel(val.id)}
-        onActionsClick={() => this.state.tabMenu.menu.popup({})}
+        onActionsClick={() => this.state.tabMenu.popup({})}
       >
         {accounts}
       </TabComponent>
     );
   }
 
-  private initMenuItems(): MenuItemType[] {
-    const menuItems = [];
-    menuItems.push(this.addAccount());
-    menuItems.push(this.importAccount());
-    return menuItems;
-  }
-
-  private addAccount(): MenuItemType {
+  private addAccount(): MenuItemConstructorOptions {
     const label = 'Add account';
     const confirm = (name: string, keypairType: KeypairType, seed: string, pass: string) => {
       const keyring = new Keyring({ type: keypairType });
@@ -120,10 +105,10 @@ class AccountsBodyPanel extends React.Component<Props, State> {
       this.props.addAccount(json);
       this.forceUpdate();
     };
-    return initModal(label, true, AddAccount, confirm, this.getModalClick(label));
+    return initMenuItem(label, true, AddAccount, confirm);
   }
 
-  private importAccount(): MenuItemType {
+  private importAccount(): MenuItemConstructorOptions {
     const label = 'Import acccount';
     const confirm = (path: string) => {
       const rawdata = fs.readFileSync(path);
@@ -136,22 +121,7 @@ class AccountsBodyPanel extends React.Component<Props, State> {
       this.props.addAccount(pair);
       this.forceUpdate();
     };
-    return initModal(label, true, ImportAccount, confirm, this.getModalClick(label));
-  }
-
-  private getModalClick(label: string) {
-    return () => {
-      const menuItems = this.state.tabMenu.menuItems;
-      const item = menuItems.find(val => val.item.label === label);
-      if (!item) {
-        return console.error("Invalid item");
-      }
-      const modal = item.modal;
-      if (!modal) {
-        return;
-      }
-      modal.visible ? modal.hide() : modal.show();
-    };
+    return initMenuItem(label, true, ImportAccount, confirm);
   }
 
   private handleAccountMenuClick(label: string, pair: KeyringPair$Json) {

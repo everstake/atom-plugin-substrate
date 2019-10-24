@@ -4,7 +4,7 @@ import * as Path from "path";
 import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 
-import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
+import { initMenuItem, initAccountContextItemModal } from "../../components/modal";
 import { NodeComponent, ContextItem } from "../../components/nodes/node";
 import { AddNode } from "../../components/nodes/modals/addNode";
 import { EditNode } from "../../components/nodes/modals/editNode";
@@ -28,20 +28,14 @@ export type Props = {
 };
 
 type State = {
-  tabMenu: {
-    menu: MenuType,
-    menuItems: MenuItemType[],
-  },
+  tabMenu: MenuType,
 
   contextItems: ContextItem[],
 };
 
 class NodesBodyPanel extends React.Component<Props, State> {
   public state: State = {
-    tabMenu: {
-      menu: new Menu(),
-      menuItems: [],
-    },
+    tabMenu: new Menu(),
 
     contextItems: [{
       label: "Remove node",
@@ -54,10 +48,14 @@ class NodesBodyPanel extends React.Component<Props, State> {
 
   componentDidMount() {
     const { tabMenu } = this.state;
-    tabMenu.menuItems = this.initMenuItems();
-    tabMenu.menuItems.forEach((val) => {
-      tabMenu.menu.append(new MenuItem(val.item));
-    });
+    tabMenu.append(new MenuItem(this.addNode()));
+    tabMenu.append(new MenuItem({ type: "separator" }));
+    tabMenu.append(new MenuItem(this.editTypes()));
+    tabMenu.append(new MenuItem(this.disconnectFromNode()));
+    tabMenu.append(new MenuItem({ type: "separator" }));
+    // tabMenu.append(new MenuItem(this.startLocalNode()));
+    // tabMenu.append(new MenuItem(this.stopLocalNode()));
+    // tabMenu.append(new MenuItem(this.clearChainData()));
     this.setState({ tabMenu });
   }
 
@@ -84,24 +82,11 @@ class NodesBodyPanel extends React.Component<Props, State> {
         className="nodes"
         panel={val}
         onTabClick={() => this.props.togglePanel(val.id)}
-        onActionsClick={() => this.state.tabMenu.menu.popup({})}
+        onActionsClick={() => this.state.tabMenu.popup({})}
       >
         {nodes}
       </TabComponent>
     );
-  }
-
-  private initMenuItems(): MenuItemType[] {
-    const menuItems = [];
-    menuItems.push(this.addNode());
-    menuItems.push({ item: { type: "separator" } as MenuItemConstructorOptions });
-    menuItems.push(this.editTypes());
-    menuItems.push(this.disconnectFromNode());
-    // menuItems.push({ item: { type: "separator" } as MenuItemConstructorOptions });
-    // menuItems.push(this.startLocalNode());
-    // menuItems.push(this.stopLocalNode());
-    // menuItems.push(this.clearChainData());
-    return menuItems;
   }
 
   private handleMenuClick(label: string, node: INode) {
@@ -113,31 +98,31 @@ class NodesBodyPanel extends React.Component<Props, State> {
     })
   }
 
-  private addNode(): MenuItemType {
+  private addNode(): MenuItemConstructorOptions {
     const label = 'Add node';
     const confirm = (name: string, endpoint: string) => {
       this.props.addNode(name, endpoint);
       this.forceUpdate();
     };
-    return initModal(label, true, AddNode, confirm, this.getModalClick(label));
+    return initMenuItem(label, true, AddNode, confirm);
   }
 
-  private editTypes(): MenuItemType {
+  private editTypes(): MenuItemConstructorOptions {
     const label = 'Edit types';
     const confirm = async () => {
       const types = await this.getTypes();
       await this.openTypesEditor(types);
     };
-    return { item: { label, click: confirm, enabled: true } };
+    return { label, click: confirm, enabled: true };
   }
 
-  private disconnectFromNode(): MenuItemType {
+  private disconnectFromNode(): MenuItemConstructorOptions {
     const label = 'Disconnect from node';
     const confirm = () => {
       // Todo:
       this.forceUpdate();
     };
-    return { item: { label, click: confirm, enabled: true } };
+    return { label, click: confirm, enabled: true };
   }
 
   // private startLocalNode(): MenuItemType {
@@ -172,21 +157,6 @@ class NodesBodyPanel extends React.Component<Props, State> {
   //   return { item: { label, click: confirm, enabled: true } };
   // }
 
-  private getModalClick(label: string) {
-    return () => {
-      const menuItems = this.state.tabMenu.menuItems;
-      const item = menuItems.find(val => val.item.label === label);
-      if (!item) {
-        return console.error("Invalid item");
-      }
-      const modal = item.modal;
-      if (!modal) {
-        return;
-      }
-      modal.visible ? modal.hide() : modal.show();
-    };
-  }
-
   private removeNode(node: INode) {
     this.props.removeNode(node.name);
     this.forceUpdate();
@@ -209,12 +179,6 @@ class NodesBodyPanel extends React.Component<Props, State> {
     const path = Path.join(pkgPath, "substrate-plugin", "assets", "types.json");
     return path;
   }
-
-  // private getLocalNodeScript(): string {
-  //   const pkgPath = atom.packages.getPackageDirPaths()[0];
-  //   const path = Path.join(pkgPath, "substrate-plugin", "assets", "local_node.js");
-  //   return path;
-  // }
 
   private async openTypesEditor(data: string) {
     const path = this.getTypesPath();

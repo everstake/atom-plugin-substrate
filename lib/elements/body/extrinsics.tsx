@@ -1,10 +1,8 @@
 import * as React from "react";
-import * as fs from "fs";
-import * as Path from "path";
 import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 
-import { MenuItemType, initModal, initAccountContextItemModal } from "../../components/modal";
+import { initMenuItem } from "../../components/modal";
 import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
@@ -23,36 +21,18 @@ export type Props = {
 };
 
 type State = {
-  tabMenu: {
-    menu: MenuType,
-    menuItems: MenuItemType[],
-  },
-
-  // contextItems: ContextItem[],
+  tabMenu: MenuType,
 };
 
 class ExtrinsicsBodyPanel extends React.Component<Props, State> {
   public state: State = {
-    tabMenu: {
-      menu: new Menu(),
-      menuItems: [],
-    },
-
-    // contextItems: [{
-    //   label: "Remove node",
-    //   click: this.removeNode.bind(this),
-    // }, {
-    //   label: "Edit node",
-    //   click: this.editNode.bind(this),
-    // }],
+    tabMenu: new Menu(),
   };
 
   componentDidMount() {
     const { tabMenu } = this.state;
-    tabMenu.menuItems = this.initMenuItems();
-    tabMenu.menuItems.forEach((val) => {
-      tabMenu.menu.append(new MenuItem(val.item));
-    });
+    tabMenu.append(new MenuItem(this.runExtrinsics()));
+    tabMenu.append(new MenuItem(this.subChainState()));
     this.setState({ tabMenu });
   }
 
@@ -79,60 +59,28 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
         className="extrinsics"
         panel={val}
         onTabClick={() => this.props.togglePanel(val.id)}
-        onActionsClick={() => this.state.tabMenu.menu.popup({})}
+        onActionsClick={() => this.state.tabMenu.popup({})}
       >
       </TabComponent>
     );
   }
 
-  private initMenuItems(): MenuItemType[] {
-    const menuItems = [];
-    menuItems.push(this.runExtrinsics());
-    menuItems.push(this.subChainState());
-    return menuItems;
-  }
-
-  private runExtrinsics(): MenuItemType {
+  private runExtrinsics(): MenuItemConstructorOptions {
     const label = 'Run extrinsics';
     const confirm = () => {
       this.forceUpdate();
     };
     const accounts = this.props.accounts;
-    return initModal(
-      label, true, RunExtrinsics,
-      confirm, this.getModalClick(label), {
-        accounts,
-      },
-    );
+    return initMenuItem(label, true, RunExtrinsics, confirm, { accounts });
   }
 
-  private subChainState(): MenuItemType {
+  private subChainState(): MenuItemConstructorOptions {
     const label = 'Subscribe for chain state';
     const confirm = () => {
       this.forceUpdate();
     };
     const accounts = this.props.accounts;
-    return initModal(
-      label, true, RunExtrinsics,
-      confirm, this.getModalClick(label), {
-        accounts,
-      },
-    );
-  }
-
-  private getModalClick(label: string) {
-    return () => {
-      const menuItems = this.state.tabMenu.menuItems;
-      const item = menuItems.find(val => val.item.label === label);
-      if (!item) {
-        return console.error("Invalid item");
-      }
-      const modal = item.modal;
-      if (!modal) {
-        return;
-      }
-      modal.visible ? modal.hide() : modal.show();
-    };
+    return initMenuItem(label, true, RunExtrinsics, confirm, { accounts });
   }
 }
 
