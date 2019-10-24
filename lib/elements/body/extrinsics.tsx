@@ -23,6 +23,7 @@ export interface Props {
   tabs: TabsState;
   accounts: IAccount[];
   nodes: INode[];
+  isConnected: boolean;
   connectedNode?: string;
   togglePanel: typeof togglePanel;
   updateConnectedNode: typeof updateConnectedNode,
@@ -73,6 +74,7 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     console.log("Disconnecting");
     if (this.state.api) {
       this.state.api.disconnect();
+      this.setState({ api: undefined });
     }
     this.props.disconnect();
     this.props.updateConnectedNode(undefined);
@@ -140,21 +142,39 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
   }
 
   private runExtrinsics(): MenuItemConstructorOptions {
+    const beforeClick = (): boolean => {
+      if (!this.state.api || !this.props.isConnected) {
+        atom.notifications.addError("Not connected to node");
+        return true;
+      }
+      return false;
+    };
     const label = 'Run extrinsics';
     const confirm = () => {
       this.forceUpdate();
     };
-    const accounts = this.props.accounts;
-    return initMenuItem(label, true, RunExtrinsics, confirm, { accounts });
+    return initMenuItem(label, true, RunExtrinsics, confirm, {}, beforeClick, () => ({
+      api: this.state.api,
+      accounts: this.props.accounts,
+    }));
   }
 
   private subChainState(): MenuItemConstructorOptions {
+    const beforeClick = (): boolean => {
+      if (!this.state.api || !this.props.isConnected) {
+        atom.notifications.addError("Not connected to node");
+        return true;
+      }
+      return false;
+    };
     const label = 'Subscribe for chain state';
     const confirm = () => {
       this.forceUpdate();
     };
-    const accounts = this.props.accounts;
-    return initMenuItem(label, true, RunExtrinsics, confirm, { accounts });
+    return initMenuItem(label, true, RunExtrinsics, confirm, {}, beforeClick, () => ({
+      api: this.state.api,
+      accounts: this.props.accounts,
+    }));
   }
 }
 
@@ -194,6 +214,7 @@ const mapStateToProps = (state: AppState) => ({
   tabs: state.tabs,
   accounts: state.substrate.accounts,
   nodes: state.substrate.nodes,
+  isConnected: state.substrate.isConnected,
   connectedNode: state.substrate.connectedNode,
 });
 

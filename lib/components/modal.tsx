@@ -27,14 +27,20 @@ export function initMenuItem(
   component: any,
   confirmClick: any,
   props: any = {},
+  preClick = (): boolean => false,
+  additionalProps = (): any | undefined => {},
 ): MenuItemConstructorOptions {
   const click = () => {
+    if (preClick()) {
+      return;
+    }
     const modal = document.createElement("div");
     const mod = atom.workspace.addModalPanel({ item: modal, visible: true });
     const reactElement = React.createElement(component, {
       closeModal: () => mod.destroy(),
       confirmClick,
       ...props,
+      ...additionalProps(),
     });
     ReactDOM.render(reactElement, modal);
   };
