@@ -9,7 +9,7 @@ import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics"
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
-import { INode, SubstrateState } from "../../store/modules/substrate/types";
+import { IAccount } from "../../store/modules/substrate/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
 // import {  } from "../../store/modules/substrate/actions";
 
@@ -18,7 +18,7 @@ const { Menu, MenuItem } = remote;
 export type Props = {
   id: number,
   tabs: TabsState,
-  substrate: SubstrateState,
+  accounts: IAccount[],
   togglePanel: typeof togglePanel,
 };
 
@@ -91,22 +91,19 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     menuItems.push(this.subChainState());
     return menuItems;
   }
-  //
-  // private handleMenuClick(label: string, node: INode) {
-  //   this.state.contextItems.forEach(val => {
-  //     if (val.label === label) {
-  //       val.click(node);
-  //       return;
-  //     }
-  //   })
-  // }
 
   private runExtrinsics(): MenuItemType {
     const label = 'Run extrinsics';
     const confirm = () => {
       this.forceUpdate();
     };
-    return initModal(label, true, RunExtrinsics, confirm, this.getModalClick(label));
+    const accounts = this.props.accounts;
+    return initModal(
+      label, true, RunExtrinsics,
+      confirm, this.getModalClick(label), {
+        accounts,
+      },
+    );
   }
 
   private subChainState(): MenuItemType {
@@ -114,40 +111,14 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     const confirm = () => {
       this.forceUpdate();
     };
-    return initModal(label, true, RunExtrinsics, confirm, this.getModalClick(label));
+    const accounts = this.props.accounts;
+    return initModal(
+      label, true, RunExtrinsics,
+      confirm, this.getModalClick(label), {
+        accounts,
+      },
+    );
   }
-
-  // private startLocalNode(): MenuItemType {
-  //   const label = 'Start local node';
-  //   const confirm = () => {
-  //     const packages = atom.packages.getActivePackages();
-  //     const pkg = packages.find(val => val.name === "atom-ide-terminal");
-  //     if (!pkg) {
-  //       atom.notifications.addError("Atom IDE Terminal not installed");
-  //       return;
-  //     }
-  //     console.log(pkg);
-  //   };
-  //   return { item: { label, click: confirm, enabled: true } };
-  // }
-  //
-  // private stopLocalNode(): MenuItemType {
-  //   const label = 'Stop local node';
-  //   const confirm = () => {
-  //     // Todo:
-  //     this.forceUpdate();
-  //   };
-  //   return { item: { label, click: confirm, enabled: true } };
-  // }
-  //
-  // private clearChainData(): MenuItemType {
-  //   const label = 'Clear chain data';
-  //   const confirm = () => {
-  //     // Todo:
-  //     this.forceUpdate();
-  //   };
-  //   return { item: { label, click: confirm, enabled: true } };
-  // }
 
   private getModalClick(label: string) {
     return () => {
@@ -163,42 +134,11 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       modal.visible ? modal.hide() : modal.show();
     };
   }
-
-  // Todo: Move to helper
-  private getTypesPath(): string {
-    const pkgPath = atom.packages.getPackageDirPaths()[0];
-    const path = Path.join(pkgPath, "substrate-plugin", "assets", "types.json");
-    return path;
-  }
-
-  // private getLocalNodeScript(): string {
-  //   const pkgPath = atom.packages.getPackageDirPaths()[0];
-  //   const path = Path.join(pkgPath, "substrate-plugin", "assets", "local_node.js");
-  //   return path;
-  // }
-
-  private async openTypesEditor(data: string) {
-    const path = this.getTypesPath();
-    try {
-      await fs.promises.writeFile(path, data, "utf8");
-    } catch (err) {}
-    await atom.workspace.open(path, {});
-  }
-
-  private async getTypes(): Promise<string> {
-    const path = this.getTypesPath();
-    try {
-      const buf = await fs.promises.readFile(path);
-      return buf.toString();
-    } catch (err) {
-      return "{}\n";
-    }
-  }
 }
 
 const mapStateToProps = (state: AppState) => ({
   tabs: state.tabs,
-  substrate: state.substrate,
+  accounts: state.substrate.accounts,
 });
 
 export default connect(

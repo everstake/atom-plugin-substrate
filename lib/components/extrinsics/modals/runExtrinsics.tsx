@@ -1,44 +1,50 @@
 import * as React from "react";
-import { Api } from '@polkadot/react-api';
-import { QueueConsumer } from '@polkadot/react-components/Status/Context';
-import Queue from '@polkadot/react-components/Status/Queue';
+import { ApiPromise } from "@polkadot/api";
 
+import { IAccount } from "../../../store/modules/substrate/types";
 import { ModalComponent } from "../../modal";
 import { DefaultButtonComponent } from "../../buttons/default";
+// import { TextInputComponent } from "../../inputs/text";
+import { SelectInputComponent, Item } from "../../inputs/select";
 
 export type Props = {
+  api: ApiPromise;
+  accounts: IAccount[];
   closeModal: () => void;
   confirmClick: () => void;
 };
 
-type State = {};
+type State = {
+  account: {
+    selected: number,
+    items: Item[],
+  },
+};
 
-const DefaultState: State = {};
-
-// Todo: Get from redux store
-const wsEndpoint = "ws://165.22.206.139:9944";
-
+const DefaultState: State = {
+  account: {
+    selected: -1,
+    items: [],
+  },
+};
 
 export class RunExtrinsics extends React.Component<Props, State> {
   public state: State = DefaultState;
 
   public render(): JSX.Element {
+    const accountItems: Item[] = this.props.accounts.map(val => ({
+      label: val.meta.name,
+    }));
+
     return (
       <ModalComponent className="run-extrinsics">
-        <React.Suspense fallback="...">
-          <Queue>
-            <QueueConsumer>
-              {({ queuePayload, queueSetTxStatus }: any): React.ReactNode => (
-                <Api
-                  queuePayload={queuePayload}
-                  queueSetTxStatus={queueSetTxStatus}
-                  url={wsEndpoint}
-                >
-                </Api>
-              )}
-            </QueueConsumer>
-          </Queue>
-        </React.Suspense>
+        <SelectInputComponent
+          className="key-type"
+          title="Account key type"
+          items={accountItems}
+          selectedItem={this.state.account.selected}
+          onChange={(_: Item, idx: number) => this.selectAccount(idx)}
+        />
         <div className="buttons">
           <DefaultButtonComponent
             className="cancel"
@@ -60,4 +66,29 @@ export class RunExtrinsics extends React.Component<Props, State> {
     this.props.closeModal();
     this.setState(DefaultState);
   }
+
+  private selectAccount(idx: number) {
+    const items = this.state.account.items;
+    this.setState({
+      account: {
+        selected: idx,
+        items: items,
+      },
+    });
+  }
 }
+// <TextInputComponent
+//   className="name"
+//   type="text"
+//   title="Account name"
+//   placeholder="Alice"
+//   value={this.state.name}
+//   onChange={(val: string) => this.setState({ name: val })}
+// />
+// <SelectInputComponent
+//   className="key-type"
+//   title="Account key type"
+//   items={this.state.keyType.items}
+//   selectedItem={this.state.keyType.selected}
+//   onChange={(_: Item, idx: number) => this.selectKeyType(idx)}
+// />

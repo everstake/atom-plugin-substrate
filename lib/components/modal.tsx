@@ -4,8 +4,9 @@ import { Panel } from "atom";
 import { MenuItemConstructorOptions } from "electron";
 
 export interface MenuItemType {
-  item: MenuItemConstructorOptions,
+  item: MenuItemConstructorOptions;
   modal?: Panel;
+  reactElement: React.ReactElement;
 };
 
 export type Props = {
@@ -26,22 +27,37 @@ export class ModalComponent extends React.Component<Props, State> {
   }
 }
 
-export function initModal(label: string, enabled: boolean, component: any, confirmClick: any, click: any): MenuItemType {
+export function initModal(
+  label: string,
+  enabled: boolean,
+  component: any,
+  confirmClick: any,
+  click: any,
+  props: any = {},
+): MenuItemType {
   const modal = document.createElement("div");
-  ReactDOM.render(React.createElement(component, {
+  const reactElement = React.createElement(component, {
     closeModal: click,
     confirmClick,
-  }), modal);
+    ...props,
+  });
+  ReactDOM.render(reactElement, modal);
   return {
     item: { label, click, enabled },
     modal: atom.workspace.addModalPanel({
       item: modal,
       visible: false,
     }),
+    reactElement,
   };
 }
 
-export function initAccountContextItemModal(component: any, props: any, confirmClick: any, click: () => void): Panel {
+export function initAccountContextItemModal(
+  component: any,
+  props: any,
+  confirmClick: any,
+  click: () => void,
+): Panel {
   const modal = document.createElement("div");
   ReactDOM.render(React.createElement(component, {
     closeModal: click,
