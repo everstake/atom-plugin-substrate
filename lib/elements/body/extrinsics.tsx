@@ -9,9 +9,11 @@ import * as clipboard from 'clipboardy';
 import { getTypesPath } from "../helpers";
 import { initMenuItem } from "../../components/modal";
 import { CodeComponent, CodeContextItem } from "../../components/extrinsics/code";
+import { ContractComponent, ContractContextItem } from "../../components/extrinsics/contract";
 import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics";
 import { SubChainState } from "../../components/extrinsics/modals/subChainState";
 import { AddExistingCode } from "../../components/extrinsics/modals/addExistingCode";
+import { AddExistingContract } from "../../components/extrinsics/modals/addExistingContract";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -49,7 +51,7 @@ export interface Props {
 interface State {
   tabMenu: MenuType;
   codeContextItems: CodeContextItem[];
-  // contractContextItems: ContextItem[];
+  contractContextItems: ContractContextItem[];
 
   api?: ApiPromise;
 };
@@ -64,6 +66,13 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     }, {
       label: "Forget code hash",
       click: this.forgetCodeHash.bind(this),
+    }],
+    contractContextItems: [{
+      label: "Copy hash",
+      click: this.copyHash.bind(this),
+    }, {
+      label: "Forget contract address",
+      click: this.forgetContractHash.bind(this),
     }],
   };
 
@@ -106,10 +115,35 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
           key={idx}
           code={code}
           accountContextItems={this.state.codeContextItems}
-          onClick={this.handleMenuClick.bind(this)}
+          onClick={(label: string, code: ICode) => {
+            this.state.codeContextItems.forEach(val => {
+              if (val.label === label) {
+                val.click(code);
+                return;
+              }
+            })
+          }}
         />
       );
     });
+    const contracts = this.props.contracts.map((contract: IContract, idx: number) => {
+      return (
+        <ContractComponent
+          key={idx}
+          contract={contract}
+          accountContextItems={this.state.contractContextItems}
+          onClick={(label: string, contract: IContract) => {
+            this.state.contractContextItems.forEach(val => {
+              if (val.label === label) {
+                val.click(contract);
+                return;
+              }
+            })
+          }}
+        />
+      );
+    });
+    const showSeparator = codes.length <= 0 || contracts.length <= 0;
     return (
       <TabComponent
         className="extrinsics"
@@ -118,6 +152,8 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
         onActionsClick={() => this.state.tabMenu.popup({})}
       >
         {codes}
+        {showSeparator ? undefined : <div className="separator"></div>}
+        {contracts}
       </TabComponent>
     );
   }
@@ -209,22 +245,12 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
   }
 
   private addExistingCode(): MenuItemConstructorOptions {
-    const beforeClick = (): boolean => {
-      if (!this.state.api || !this.props.isConnected) {
-        atom.notifications.addError("Not connected to node");
-        return true;
-      }
-      return false;
-    };
     const label = 'Add existing code';
     const confirm = (code: ICode) => {
       this.props.addCode(code);
       this.forceUpdate();
     };
-    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
-      api: this.state.api,
-      accounts: this.props.accounts,
-    }));
+    return initMenuItem(label, true, AddExistingCode, confirm, {});
   }
 
   private uploadWasm(): MenuItemConstructorOptions {
@@ -236,7 +262,8 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       return false;
     };
     const label = 'Upload WASM';
-    const confirm = () => {
+    const confirm = (code: ICode) => {
+      this.props.addCode(code);
       this.forceUpdate();
     };
     return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
@@ -246,18 +273,12 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
   }
 
   private addExistingContract(): MenuItemConstructorOptions {
-    const beforeClick = (): boolean => {
-      if (!this.state.api || !this.props.isConnected) {
-        atom.notifications.addError("Not connected to node");
-        return true;
-      }
-      return false;
-    };
     const label = 'Add existing contract';
-    const confirm = () => {
+    const confirm = (contract: IContract) => {
+      this.props.addContract(contract);
       this.forceUpdate();
     };
-    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick);
+    return initMenuItem(label, true, AddExistingContract, confirm, {});
   }
 
   private deployContract(): MenuItemConstructorOptions {
@@ -269,7 +290,8 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       return false;
     };
     const label = 'Deploy contract';
-    const confirm = () => {
+    const confirm = (contract: IContract) => {
+      this.props.addContract(contract);
       this.forceUpdate();
     };
     return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
@@ -278,21 +300,17 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     }));
   }
 
-  private handleMenuClick(label: string, code: ICode) {
-    this.state.codeContextItems.forEach(val => {
-      if (val.label === label) {
-        val.click(code);
-        return;
-      }
-    })
-  }
-
   private copyHash({ address }: { address: string }) {
     clipboard.writeSync(address);
   }
 
   private forgetCodeHash(code: ICode) {
     this.props.removeCode(code.name);
+    this.forceUpdate();
+  }
+
+  private forgetContractHash(contract: IContract) {
+    this.props.removeContract(contract.name);
     this.forceUpdate();
   }
 }

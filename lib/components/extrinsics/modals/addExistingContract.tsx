@@ -1,6 +1,9 @@
 import * as React from "react";
+import * as fs from "fs";
 import { Abi } from '@polkadot/api-contract';
+import { remote } from "electron";
 
+import { FileInputComponent } from "../../inputs/file";
 import { ModalComponent } from "../../modal";
 import { DefaultButtonComponent } from "../../buttons/default";
 import { TextInputComponent } from "../../inputs/text";
@@ -15,12 +18,18 @@ export interface Props {
 interface State {
   name: string;
   hash: string;
-  abi?: Abi;
+  abi: {
+    path: string;
+    value?: Abi;
+  };
 };
 
 const DefaultState: State = {
   name: "",
   hash: "",
+  abi: {
+    path: "",
+  },
 };
 
 export class AddExistingContract extends React.Component<Props, State> {
@@ -45,6 +54,13 @@ export class AddExistingContract extends React.Component<Props, State> {
           value={this.state.hash}
           onChange={(val: string) => this.setState({ hash: val })}
         />
+        <FileInputComponent
+          className="path"
+          title="Contract ABI file"
+          placeholder=""
+          value={this.state.abi.path}
+          onClick={() => this.handleFileClick()}
+        />
         <div className="buttons">
           <DefaultButtonComponent
             className="cancel"
@@ -61,6 +77,24 @@ export class AddExistingContract extends React.Component<Props, State> {
     );
   }
 
+  private async handleFileClick() {
+    const files: any = await remote.dialog.showOpenDialog(
+      remote.getCurrentWindow(), {
+      properties: ['openFile'],
+    });
+    if (!files || !files.length) {
+      return;
+    }
+    const codePath = files[0];
+    const abiBytes: Uint8Array = fs.readFileSync(codePath);
+    const abiJson = JSON.parse(abiBytes.toString());
+    const abi = {
+      path: files[0],
+      value: new Abi(abiJson),
+    };
+    this.setState({ abi });
+  }
+
   private handleConfirm() {
     const { name, hash, abi } = this.state;
     if (!name.trim().length) {
@@ -71,11 +105,16 @@ export class AddExistingContract extends React.Component<Props, State> {
       atom.notifications.addError("Invalid hash");
       return;
     }
-    if (!abi) {
+    if (!abi.value) {
       atom.notifications.addError("Invalid abi");
       return;
     }
-    this.props.confirmClick({ name, address: hash, abi: abi.toString() });
+    console.log(JSON.parse(JSON.stringify(abi.value)));
+    this.props.confirmClick({
+      name,
+      address: hash,
+      abi: JSON.stringify(abi.value),
+    });
     this.props.closeModal();
   }
 }
