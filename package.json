@@ -15,11 +15,6 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "activationCommands": {
-    "atom-workspace": [
-      "substrate-plugin:toggle"
-    ]
-  },
   "consumedServices": {
     "status-bar": {
       "versions": {
@@ -42,15 +37,24 @@
   ],
   "prettier": {},
   "dependencies": {
+    "@polkadot/api": "^0.95.1",
+    "@polkadot/api-contract": "^0.95.1",
+    "@polkadot/keyring": "^1.5.1",
+    "@polkadot/util-crypto": "^1.5.1",
     "atom-ts-transpiler": "^1.5.2",
+    "clipboardy": "^2.1.0",
     "list": "^2.0.14",
     "react": "^16.10.1",
     "react-dom": "^16.10.1",
+    "react-redux": "^7.1.1",
+    "redux": "^4.0.4",
     "typescript": "^3.0.3"
   },
   "devDependencies": {
     "@types/atom": "^1.36.1",
-    "@types/react": "^16.9.4",
-    "@types/react-dom": "^16.9.1"
+    "@types/electron": "^1.6.10",
+    "@types/react": "^16.9.5",
+    "@types/react-dom": "^16.9.1",
+    "@types/react-redux": "^7.1.4"
   }
 }

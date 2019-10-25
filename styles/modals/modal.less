@@ -1,0 +1,40 @@
+.substrate-modal {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .buttons {
+    display: flex;
+    margin-top: 5px;
+
+    .cancel {
+      flex: 1;
+      margin-right: 5px;
+    }
+    .confirm {
+      flex: 2;
+    }
+  }
+
+  .arguments {
+    border-top: 1px solid #2a2f37;
+    border-bottom: 1px solid #2a2f37;
+    padding-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .result {
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px 0;
+    min-width: 200px;
+    min-height: 50px;
+    background-color: transparent;
+    border: 1px solid #2a2f37;
+    resize: none;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}

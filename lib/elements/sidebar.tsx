@@ -1,24 +1,24 @@
 import * as React from "react";
-import { CompositeDisposable, TextEditor } from "atom";
+import { Store } from "redux";
+import { Provider } from "react-redux";
+
+import AccordionPanel from "./accordion";
 
 export type Props = {
-  editor: TextEditor | undefined;
+  store: Store<any, any>,
 };
 
 type State = {};
 
 export class SidebarPanel extends React.Component<Props, State> {
-  private subscriptions = new CompositeDisposable();
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {} as State;
-  }
+  public state: State = {};
 
   public render(): JSX.Element {
     return (
       <div className="substrate-plugin-sidebar">
-        <p>Sidebar works!</p>
+        <Provider store={this.props.store}>
+          <AccordionPanel />
+        </Provider>
       </div>
     );
   }

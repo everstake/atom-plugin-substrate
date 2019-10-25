@@ -3,16 +3,68 @@
 // See https://github.com/atom/atom-dark-ui/blob/master/styles/ui-variables.less
 // for a full listing of what's available.
 @import "ui-variables";
+@import "./tabs";
+@import "./modals/modal";
+
+@import "./components/sb-default";
+@import "./components/si-file";
+@import "./components/si-select";
+@import "./components/si-text";
 
 .substrate-plugin {
-  .substrate-plugin-sidebar {
+  .substrate-plugin-sidebar .accordion {
     height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
 
-    p {
-      font-size: 20px;
+    .tab {
+      // flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      .tab-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 24px;
+        background-color: #2a2f37;
+        transition: background-color .3s linear;
+        user-select: none;
+
+        .actions {
+          cursor: pointer;
+          font-size: 6px;
+          width: 36px;
+          padding: 5px 5px 5px 5px;
+          text-align: center;
+        }
+        span {
+          cursor: pointer;
+          width: 100%;
+          padding: 5px 0 5px 10px;
+        }
+        span:before {
+          content: '▼';
+          display: inline-block;
+          transform: rotate(0deg);
+          margin-right: 10px;
+        }
+      }
+      &.closed {
+        & .tab-label span:before {
+          transform: rotate(-90deg);
+        }
+        .tab-content {
+          display: none;
+        }
+      }
+      .tab-content {
+        height: 100%;
+
+        @import "./panels/nodes";
+        @import "./panels/accounts";
+        @import "./panels/extrinsics";
+      }
     }
   }
 }
