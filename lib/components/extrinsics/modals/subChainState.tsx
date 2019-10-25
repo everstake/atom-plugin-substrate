@@ -18,6 +18,7 @@ interface State {
     selectedItem: number;
   };
   arg?: string;
+  result?: string;
 };
 
 const DefaultState: State = {
@@ -54,6 +55,7 @@ export class SubChainState extends React.Component<Props, State> {
           })}
         />
         {this.renderArguments()}
+        {this.renderResult()}
         <div className="buttons">
           <DefaultButtonComponent
             className="cancel"
@@ -70,19 +72,19 @@ export class SubChainState extends React.Component<Props, State> {
     );
   }
 
-  private renderArguments(): JSX.Element {
+  private renderArguments(): JSX.Element | undefined {
     const query = this.getExtrinsic();
     if (!query) {
-      return <div></div>;
+      return;
     }
     const meta = query.value.meta;
     const name = meta.toJSON();
     if (!(name instanceof Object)) {
-      return <div></div>;
+      return;
     }
     const map = name.type.Map;
     if (!map) {
-      return <div></div>;
+      return;
     }
     return (
       <div className="arguments">
@@ -96,6 +98,14 @@ export class SubChainState extends React.Component<Props, State> {
         />
       </div>
     );
+  }
+
+  private renderResult(): JSX.Element | undefined {
+    const result = this.state.result;
+    if (!result) {
+      return;
+    }
+    return <textarea className="result" readOnly value={`Result: ${result}`}></textarea>;
   }
 
   private getExtrinsic(): any {
@@ -143,16 +153,13 @@ export class SubChainState extends React.Component<Props, State> {
   private handleConfirm() {
     this.exec();
     this.props.confirmClick();
-    this.props.closeModal();
   }
 
   private async exec() {
     try {
       const chainState = this.getExtrinsic().value;
-      // const panel = vscode.window.createWebviewPanel('chainResult', 'Chain state result', vscode.ViewColumn.One);
       await chainState(this.state.arg, (data: any) => {
-        console.log("Result:", data);
-        // panel.webview.html = this.getWebviewContent(item.module, item.label, data.isEmpty ? 'empty' : data);
+        this.setState({ result: data.toString() });
       });
     } catch (err) {
       atom.notifications.addError(`Error on extrinsic: ${err.message}`);
