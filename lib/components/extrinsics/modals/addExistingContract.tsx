@@ -7,10 +7,9 @@ import { FileInputComponent } from "../../inputs/file";
 import { ModalComponent } from "../../modal";
 import { DefaultButtonComponent } from "../../buttons/default";
 import { TextInputComponent } from "../../inputs/text";
-import { ICode, IContract } from "../../../store/modules/substrate/types";
+import { IContract } from "../../../store/modules/substrate/types";
 
 export interface Props {
-  codes: ICode[];
   closeModal: () => void;
   confirmClick: (contract: IContract) => void;
 };
@@ -20,7 +19,7 @@ interface State {
   hash: string;
   abi: {
     path: string;
-    value?: Abi;
+    abiJson?: string;
   };
 };
 
@@ -86,13 +85,18 @@ export class AddExistingContract extends React.Component<Props, State> {
       return;
     }
     const codePath = files[0];
-    const abiBytes: Uint8Array = fs.readFileSync(codePath);
-    const abiJson = JSON.parse(abiBytes.toString());
-    const abi = {
-      path: files[0],
-      value: new Abi(abiJson),
-    };
-    this.setState({ abi });
+    try {
+      const abiBytes: Uint8Array = fs.readFileSync(codePath);
+      const abiJson = JSON.parse(abiBytes.toString());
+      new Abi(abiJson);
+      const abi = {
+        path: files[0],
+        abiJson: JSON.stringify(abiJson),
+      };
+      this.setState({ abi });
+    } catch (err) {
+      atom.notifications.addError(`Failed to deserialize ABI: ${err.message}`);
+    }
   }
 
   private handleConfirm() {
@@ -105,16 +109,11 @@ export class AddExistingContract extends React.Component<Props, State> {
       atom.notifications.addError("Invalid hash");
       return;
     }
-    if (!abi.value) {
+    if (!abi.abiJson) {
       atom.notifications.addError("Invalid abi");
       return;
     }
-    console.log(JSON.parse(JSON.stringify(abi.value)));
-    this.props.confirmClick({
-      name,
-      address: hash,
-      abi: JSON.stringify(abi.value),
-    });
+    this.props.confirmClick({ name, address: hash, abi: abi.abiJson });
     this.props.closeModal();
   }
 }

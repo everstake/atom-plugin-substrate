@@ -14,6 +14,7 @@ import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics"
 import { SubChainState } from "../../components/extrinsics/modals/subChainState";
 import { AddExistingCode } from "../../components/extrinsics/modals/addExistingCode";
 import { AddExistingContract } from "../../components/extrinsics/modals/addExistingContract";
+import { UploadWasm } from "../../components/extrinsics/modals/uploadWasm";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -167,8 +168,8 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
   }
 
   async disconnect() {
-    console.log("Disconnecting");
     if (this.state.api) {
+      console.log("Disconnecting");
       this.state.api.disconnect();
       this.setState({ api: undefined });
     }
@@ -266,9 +267,10 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       this.props.addCode(code);
       this.forceUpdate();
     };
-    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
+    return initMenuItem(label, true, UploadWasm, confirm, {}, beforeClick, () => ({
       api: this.state.api,
       accounts: this.props.accounts,
+      codes: this.props.codes,
     }));
   }
 
