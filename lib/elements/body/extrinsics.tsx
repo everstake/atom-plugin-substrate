@@ -8,6 +8,7 @@ import { RegistryTypes } from '@polkadot/types/types';
 import { getTypesPath } from "../helpers";
 import { initMenuItem } from "../../components/modal";
 import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics";
+import { SubChainState } from "../../components/extrinsics/modals/subChainState";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -171,7 +172,7 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     const confirm = () => {
       this.forceUpdate();
     };
-    return initMenuItem(label, true, RunExtrinsics, confirm, {}, beforeClick, () => ({
+    return initMenuItem(label, true, SubChainState, confirm, {}, beforeClick, () => ({
       api: this.state.api,
       accounts: this.props.accounts,
     }));

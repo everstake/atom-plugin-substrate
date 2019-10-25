@@ -185,13 +185,8 @@ export class RunExtrinsics extends React.Component<Props, State> {
       const account = keyring.addFromJson(this.props.accounts[this.state.account]);
       const nonce = await con.query.system.accountNonce(account.address);
       const extrinsic = this.getExtrinsic().value;
-      console.log(extrinsic.toJSON());
       const unsignedTransaction = extrinsic(...this.state.args);
       account.decodePkcs8(this.state.pass);
-
-      con.on("error", (args) => {
-        atom.notifications.addError(`Failed to execute extrinsic with args: ${args}`);
-      });
 
       await unsignedTransaction.sign(account, { nonce: nonce as any }).send(({ events = [], status }: any) => {
         if (status.isFinalized) {
