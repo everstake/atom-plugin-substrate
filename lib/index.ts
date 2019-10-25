@@ -80,7 +80,8 @@ module.exports = new class SubstratePlugin {
       })
     );
     if (state) {
-      const reduxState = JSON.parse(state.reduxState);
+      const rdxState = !state.reduxState.length ? "{}" : state.reduxState;
+      const reduxState = JSON.parse(rdxState);
       this.props.store = configureStore(reduxState);
     }
     if (!this.props.store.getState().tabs.panels.length) {

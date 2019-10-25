@@ -11,6 +11,7 @@ import { initMenuItem } from "../../components/modal";
 import { CodeComponent, CodeContextItem } from "../../components/extrinsics/code";
 import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics";
 import { SubChainState } from "../../components/extrinsics/modals/subChainState";
+import { AddExistingCode } from "../../components/extrinsics/modals/addExistingCode";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -70,6 +71,12 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     const { tabMenu } = this.state;
     tabMenu.append(new MenuItem(this.runExtrinsics()));
     tabMenu.append(new MenuItem(this.subChainState()));
+    tabMenu.append(new MenuItem({ type: "separator" }));
+    tabMenu.append(new MenuItem(this.addExistingCode()));
+    tabMenu.append(new MenuItem(this.uploadWasm()));
+    tabMenu.append(new MenuItem({ type: "separator" }));
+    tabMenu.append(new MenuItem(this.addExistingContract()));
+    tabMenu.append(new MenuItem(this.deployContract()));
     this.setState({ tabMenu });
 
     this.setupConnection();
@@ -201,6 +208,76 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     }));
   }
 
+  private addExistingCode(): MenuItemConstructorOptions {
+    const beforeClick = (): boolean => {
+      if (!this.state.api || !this.props.isConnected) {
+        atom.notifications.addError("Not connected to node");
+        return true;
+      }
+      return false;
+    };
+    const label = 'Add existing code';
+    const confirm = (code: ICode) => {
+      this.props.addCode(code);
+      this.forceUpdate();
+    };
+    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
+      api: this.state.api,
+      accounts: this.props.accounts,
+    }));
+  }
+
+  private uploadWasm(): MenuItemConstructorOptions {
+    const beforeClick = (): boolean => {
+      if (!this.state.api || !this.props.isConnected) {
+        atom.notifications.addError("Not connected to node");
+        return true;
+      }
+      return false;
+    };
+    const label = 'Upload WASM';
+    const confirm = () => {
+      this.forceUpdate();
+    };
+    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
+      api: this.state.api,
+      accounts: this.props.accounts,
+    }));
+  }
+
+  private addExistingContract(): MenuItemConstructorOptions {
+    const beforeClick = (): boolean => {
+      if (!this.state.api || !this.props.isConnected) {
+        atom.notifications.addError("Not connected to node");
+        return true;
+      }
+      return false;
+    };
+    const label = 'Add existing contract';
+    const confirm = () => {
+      this.forceUpdate();
+    };
+    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick);
+  }
+
+  private deployContract(): MenuItemConstructorOptions {
+    const beforeClick = (): boolean => {
+      if (!this.state.api || !this.props.isConnected) {
+        atom.notifications.addError("Not connected to node");
+        return true;
+      }
+      return false;
+    };
+    const label = 'Deploy contract';
+    const confirm = () => {
+      this.forceUpdate();
+    };
+    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
+      api: this.state.api,
+      accounts: this.props.accounts,
+    }));
+  }
+
   private handleMenuClick(label: string, code: ICode) {
     this.state.codeContextItems.forEach(val => {
       if (val.label === label) {
@@ -256,6 +333,8 @@ const mapStateToProps = (state: AppState) => ({
   tabs: state.tabs,
   accounts: state.substrate.accounts,
   nodes: state.substrate.nodes,
+  codes: state.substrate.codes,
+  contracts: state.substrate.contracts,
   isConnected: state.substrate.isConnected,
   connectedNode: state.substrate.connectedNode,
 });

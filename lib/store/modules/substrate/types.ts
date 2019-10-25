@@ -1,4 +1,3 @@
-import { Abi } from "@polkadot/api-contract";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 export interface IAccount extends KeyringPair$Json {}
@@ -9,7 +8,7 @@ export interface INode {
 export interface IContract {
   name: string;
   address: string;
-  abi: Abi;
+  abi: string;
 }
 export interface ICode {
   name: string;
