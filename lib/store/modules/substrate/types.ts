@@ -1,9 +1,19 @@
+import { Abi } from "@polkadot/api-contract";
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 export interface IAccount extends KeyringPair$Json {}
 export interface INode {
   name: string;
   endpoint: string;
+}
+export interface IContract {
+  name: string;
+  address: string;
+  abi: Abi;
+}
+export interface ICode {
+  name: string;
+  address: string;
 }
 
 export interface SubstrateState {
@@ -12,6 +22,8 @@ export interface SubstrateState {
 
   accounts: IAccount[];
   nodes: INode[];
+  codes: ICode[];
+  contracts: IContract[];
 }
 
 // Describing the different ACTION NAMES available
@@ -28,6 +40,11 @@ export enum SubstrateActionTypes {
   /* Connection */
   CONNECT = "CONNECT",
   DISCONNECT = "DISCONNECT",
+  /* Contracts */
+  ADD_CODE = "ADD_CODE",
+  REMOVE_CODE = "REMOVE_CODE",
+  ADD_CONTRACT = "ADD_CONTRACT",
+  REMOVE_CONTRACT = "REMOVE_CONTRACT",
 }
 
 export interface IBaseAction {
@@ -81,4 +98,26 @@ export interface IConnectSubstrateAction extends IBaseAction {
 
 export interface IDisonnectSubstrateAction extends IBaseAction {
   type: SubstrateActionTypes.DISCONNECT;
+}
+
+/* Contracts */
+
+export interface IAddCodeSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.ADD_CODE;
+  payload: ICode;
+}
+
+export interface IRemoveCodeSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.REMOVE_CODE;
+  payload: string;
+}
+
+export interface IAddContractSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.ADD_CONTRACT;
+  payload: IContract;
+}
+
+export interface IRemoveContractSubstrateAction extends IBaseAction {
+  type: SubstrateActionTypes.REMOVE_CONTRACT;
+  payload: string;
 }

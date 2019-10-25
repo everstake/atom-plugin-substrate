@@ -1,6 +1,6 @@
 import { KeyringPair$Json } from "@polkadot/keyring/types";
 import {
-  INode,
+  INode, ICode, IContract,
   SubstrateActionTypes,
   IAddAccountSubstrateAction,
   IRemoveAccountSubstrateAction,
@@ -11,6 +11,10 @@ import {
   IUpdateConnectedNodeSubstrateAction,
   IConnectSubstrateAction,
   IDisonnectSubstrateAction,
+  IAddCodeSubstrateAction,
+  IRemoveCodeSubstrateAction,
+  IAddContractSubstrateAction,
+  IRemoveContractSubstrateAction,
 } from "./types";
 
 /* Accounts */
@@ -77,5 +81,35 @@ export function connect(): IConnectSubstrateAction {
 export function disconnect(): IDisonnectSubstrateAction {
   return {
     type: SubstrateActionTypes.DISCONNECT,
+  };
+}
+
+/* Contracts */
+
+export function addCode(code: ICode): IAddCodeSubstrateAction {
+  return {
+    type: SubstrateActionTypes.ADD_CODE,
+    payload: code,
+  };
+}
+
+export function removeCode(name: string): IRemoveCodeSubstrateAction {
+  return {
+    type: SubstrateActionTypes.REMOVE_CODE,
+    payload: name,
+  };
+}
+
+export function addContract(contract: IContract): IAddContractSubstrateAction {
+  return {
+    type: SubstrateActionTypes.ADD_CONTRACT,
+    payload: contract,
+  };
+}
+
+export function removeContract(name: string): IRemoveContractSubstrateAction {
+  return {
+    type: SubstrateActionTypes.REMOVE_CONTRACT,
+    payload: name,
   };
 }

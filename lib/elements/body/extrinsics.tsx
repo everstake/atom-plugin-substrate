@@ -4,17 +4,23 @@ import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect as reduxConnect } from "react-redux";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { RegistryTypes } from '@polkadot/types/types';
+import * as clipboard from 'clipboardy';
 
 import { getTypesPath } from "../helpers";
 import { initMenuItem } from "../../components/modal";
+import { CodeComponent, CodeContextItem } from "../../components/extrinsics/code";
 import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics";
 import { SubChainState } from "../../components/extrinsics/modals/subChainState";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
-import { IAccount, INode } from "../../store/modules/substrate/types";
+import { IAccount, INode, ICode, IContract } from "../../store/modules/substrate/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
-import { updateConnectedNode, connect, disconnect } from "../../store/modules/substrate/actions";
+import {
+  updateConnectedNode, connect, disconnect,
+  addCode, removeCode,
+  addContract, removeContract,
+} from "../../store/modules/substrate/actions";
 
 const { Menu, MenuItem } = remote;
 
@@ -24,16 +30,25 @@ export interface Props {
   tabs: TabsState;
   accounts: IAccount[];
   nodes: INode[];
+  codes: ICode[];
+  contracts: IContract[];
   isConnected: boolean;
   connectedNode?: string;
+
   togglePanel: typeof togglePanel;
   updateConnectedNode: typeof updateConnectedNode,
   connect: typeof connect,
   disconnect: typeof disconnect,
+  addCode: typeof addCode,
+  removeCode: typeof removeCode,
+  addContract: typeof addContract,
+  removeContract: typeof removeContract,
 };
 
 interface State {
   tabMenu: MenuType;
+  codeContextItems: CodeContextItem[];
+  // contractContextItems: ContextItem[];
 
   api?: ApiPromise;
 };
@@ -41,6 +56,14 @@ interface State {
 class ExtrinsicsBodyPanel extends React.Component<Props, State> {
   public state: State = {
     tabMenu: new Menu(),
+
+    codeContextItems: [{
+      label: "Copy hash",
+      click: this.copyHash.bind(this),
+    }, {
+      label: "Forget code hash",
+      click: this.forgetCodeHash.bind(this),
+    }],
   };
 
   componentDidMount() {
@@ -61,6 +84,35 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     if (isChanged) {
       this.setupConnection();
     }
+  }
+
+  public render(): JSX.Element {
+    const val = this.props.tabs.panels.find(
+      (value) => value.id === this.props.id,
+    );
+    if (!val) {
+      return <span>Invalid tabs</span>;
+    }
+    const codes = this.props.codes.map((code: ICode, idx: number) => {
+      return (
+        <CodeComponent
+          key={idx}
+          code={code}
+          accountContextItems={this.state.codeContextItems}
+          onClick={this.handleMenuClick.bind(this)}
+        />
+      );
+    });
+    return (
+      <TabComponent
+        className="extrinsics"
+        panel={val}
+        onTabClick={() => this.props.togglePanel(val.id)}
+        onActionsClick={() => this.state.tabMenu.popup({})}
+      >
+        {codes}
+      </TabComponent>
+    );
   }
 
   async setupConnection() {
@@ -113,35 +165,6 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     this.props.updateConnectedNode(name);
   }
 
-  public render(): JSX.Element {
-    const val = this.props.tabs.panels.find(
-      (value) => value.id === this.props.id,
-    );
-    if (!val) {
-      return <span>Invalid tabs</span>;
-    }
-    // const nds = this.props.substrate.nodes;
-    // const nodes = nds.map((node: INode, index: number) => {
-    //   return (
-    //     <NodeComponent
-    //       key={index}
-    //       node={node}
-    //       accountContextItems={this.state.contextItems}
-    //       onClick={this.handleMenuClick.bind(this)}
-    //     />
-    //   );
-    // });
-    return (
-      <TabComponent
-        className="extrinsics"
-        panel={val}
-        onTabClick={() => this.props.togglePanel(val.id)}
-        onActionsClick={() => this.state.tabMenu.popup({})}
-      >
-      </TabComponent>
-    );
-  }
-
   private runExtrinsics(): MenuItemConstructorOptions {
     const beforeClick = (): boolean => {
       if (!this.state.api || !this.props.isConnected) {
@@ -176,6 +199,24 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       api: this.state.api,
       accounts: this.props.accounts,
     }));
+  }
+
+  private handleMenuClick(label: string, code: ICode) {
+    this.state.codeContextItems.forEach(val => {
+      if (val.label === label) {
+        val.click(code);
+        return;
+      }
+    })
+  }
+
+  private copyHash({ address }: { address: string }) {
+    clipboard.writeSync(address);
+  }
+
+  private forgetCodeHash(code: ICode) {
+    this.props.removeCode(code.name);
+    this.forceUpdate();
   }
 }
 
@@ -221,5 +262,9 @@ const mapStateToProps = (state: AppState) => ({
 
 export default reduxConnect(
   mapStateToProps,
-  { togglePanel, updateConnectedNode, connect, disconnect }
+  {
+    togglePanel, updateConnectedNode, connect, disconnect,
+    addCode, removeCode,
+    addContract, removeContract,
+  }
 )(ExtrinsicsBodyPanel);
