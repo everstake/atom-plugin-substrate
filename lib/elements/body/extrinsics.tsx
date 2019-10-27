@@ -7,7 +7,7 @@ import { RegistryTypes } from '@polkadot/types/types';
 import * as clipboard from 'clipboardy';
 
 import { getTypesPath } from "../helpers";
-import { initMenuItem } from "../../components/modal";
+import { initMenuItem, initAccountContextItemModal } from "../../components/modal";
 import { CodeComponent, CodeContextItem } from "../../components/extrinsics/code";
 import { ContractComponent, ContractContextItem } from "../../components/extrinsics/contract";
 import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics";
@@ -15,6 +15,8 @@ import { SubChainState } from "../../components/extrinsics/modals/subChainState"
 import { AddExistingCode } from "../../components/extrinsics/modals/addExistingCode";
 import { AddExistingContract } from "../../components/extrinsics/modals/addExistingContract";
 import { UploadWasm } from "../../components/extrinsics/modals/uploadWasm";
+import { DeployContract } from "../../components/extrinsics/modals/deployContract";
+import { CallContract } from "../../components/extrinsics/modals/callContract";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -69,6 +71,9 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       click: this.forgetCodeHash.bind(this),
     }],
     contractContextItems: [{
+    //   label: "Call contract",
+    //   click: this.callContract.bind(this),
+    // }, {
       label: "Copy hash",
       click: this.copyHash.bind(this),
     }, {
@@ -287,13 +292,23 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     };
     return initMenuItem(label, true, AddExistingContract, confirm, {});
   }
+  //
+  // private callContract(contract: IContract) {
+  //   const mod = initAccountContextItemModal(CallContract, {
+  //     api: this.state.api,
+  //     contract,
+  //   }, () => {
+  //     // this.props.renameAccount(pair.meta.name, name);
+  //   }, () => mod.hide());
+  //   mod.show();
+  // }
 
   private deployContract(): MenuItemConstructorOptions {
     const beforeClick = (): boolean => {
-      if (!this.state.api || !this.props.isConnected) {
-        atom.notifications.addError("Not connected to node");
-        return true;
-      }
+      // if (!this.state.api || !this.props.isConnected) {
+      //   atom.notifications.addError("Not connected to node");
+      //   return true;
+      // }
       return false;
     };
     const label = 'Deploy contract';
@@ -301,9 +316,11 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       this.props.addContract(contract);
       this.forceUpdate();
     };
-    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
+    return initMenuItem(label, true, DeployContract, confirm, {}, beforeClick, () => ({
       api: this.state.api,
       accounts: this.props.accounts,
+      codes: this.props.codes,
+      contracts: this.props.contracts,
     }));
   }
 
