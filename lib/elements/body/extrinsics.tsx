@@ -193,8 +193,13 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     try {
       const types = await this.getTypes();
       const provider = new WsProvider(endpoint);
-      const api = new ApiPromise({ provider, types });
-      api.on("error", ConnectionHandler.create(5, () => {
+      const api = new ApiPromise({
+        provider,
+        types: {
+          ...types,
+        },
+      });
+      api.on("error", ConnectionHandler.create(999, () => {
         atom.notifications.addError("Failed to connect");
         api.disconnect();
         this.props.disconnect();

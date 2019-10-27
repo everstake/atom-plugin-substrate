@@ -167,10 +167,11 @@ export class UploadWasm extends React.Component<Props, State> {
     try {
       const con = this.props.api;
       const nonce = await con.query.system.accountNonce(pair.address);
-      const contractApi = con.tx.contracts ? con.tx['contracts'] : con.tx['contract'];
-      const unsignedTransaction = contractApi.putCode(max_gas, compiled_contract);
+      const contractApi = con.tx["contracts"] ? con.tx["contracts"] : con.tx["contract"];
+      const unsignedTransaction = contractApi.putCode(max_gas, compiled_contract.bytes);
 
-      await unsignedTransaction.sign(pair, { nonce: nonce as any }).send(({ events = [], status }: any) => {
+      const signedTransaction = unsignedTransaction.sign(pair, { nonce: nonce as any });
+      await signedTransaction.send(({ events = [], status }: any) => {
         if (status.isFinalized) {
           const finalized = status.asFinalized.toHex();
           console.log(`Completed at block hash: ${finalized}`);
