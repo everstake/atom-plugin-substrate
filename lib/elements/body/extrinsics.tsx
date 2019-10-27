@@ -7,7 +7,7 @@ import { RegistryTypes } from '@polkadot/types/types';
 import * as clipboard from 'clipboardy';
 
 import { getTypesPath } from "../helpers";
-import { initMenuItem } from "../../components/modal";
+import { initMenuItem, initAccountContextItemModal } from "../../components/modal";
 import { CodeComponent, CodeContextItem } from "../../components/extrinsics/code";
 import { ContractComponent, ContractContextItem } from "../../components/extrinsics/contract";
 import { RunExtrinsics } from "../../components/extrinsics/modals/runExtrinsics";
@@ -15,6 +15,8 @@ import { SubChainState } from "../../components/extrinsics/modals/subChainState"
 import { AddExistingCode } from "../../components/extrinsics/modals/addExistingCode";
 import { AddExistingContract } from "../../components/extrinsics/modals/addExistingContract";
 import { UploadWasm } from "../../components/extrinsics/modals/uploadWasm";
+import { DeployContract } from "../../components/extrinsics/modals/deployContract";
+import { CallContract } from "../../components/extrinsics/modals/callContract";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
@@ -69,6 +71,11 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       click: this.forgetCodeHash.bind(this),
     }],
     contractContextItems: [{
+      label: "Call contract",
+      click: this.callContract.bind(this),
+    }, {
+      separator: true,
+    }, {
       label: "Copy hash",
       click: this.copyHash.bind(this),
     }, {
@@ -135,8 +142,11 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
           accountContextItems={this.state.contractContextItems}
           onClick={(label: string, contract: IContract) => {
             this.state.contractContextItems.forEach(val => {
+              if (val.separator) {
+                return;
+              }
               if (val.label === label) {
-                val.click(contract);
+                val.click!(contract);
                 return;
               }
             })
@@ -144,7 +154,15 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
         />
       );
     });
+    const isEmpty = codes.length <= 0 && contracts.length <= 0;
     const showSeparator = codes.length <= 0 || contracts.length <= 0;
+    const data = (
+      <div>
+        {codes}
+        {showSeparator ? undefined : <div className="separator"></div>}
+        {contracts}
+      </div>
+    );
     return (
       <TabComponent
         className="extrinsics"
@@ -152,9 +170,7 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
         onTabClick={() => this.props.togglePanel(val.id)}
         onActionsClick={() => this.state.tabMenu.popup({})}
       >
-        {codes}
-        {showSeparator ? undefined : <div className="separator"></div>}
-        {contracts}
+        {!isEmpty ? data : <div className="empty">No codes or contracts found</div>}
       </TabComponent>
     );
   }
@@ -193,10 +209,17 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     try {
       const types = await this.getTypes();
       const provider = new WsProvider(endpoint);
-      const api = new ApiPromise({ provider, types });
-      api.on("error", ConnectionHandler.create(5, () => {
-        atom.notifications.addError("Failed to connect");
-        api.disconnect();
+      const api = new ApiPromise({
+        provider,
+        types: {
+          ...types,
+        },
+      });
+      api.on("error", ConnectionHandler.create((totalRetries: number) => {
+        if (totalRetries >= 5) {
+          atom.notifications.addError("Failed to connect");
+          api.disconnect();
+        }
         this.props.disconnect();
       }));
       await api.isReady;
@@ -283,12 +306,23 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     return initMenuItem(label, true, AddExistingContract, confirm, {});
   }
 
+  private callContract(contract: IContract) {
+    const mod = initAccountContextItemModal(CallContract, {
+      api: this.state.api,
+      accounts: this.props.accounts,
+      contract,
+    }, () => {
+      // this.props.renameAccount(pair.meta.name, name);
+    }, () => mod.hide());
+    mod.show();
+  }
+
   private deployContract(): MenuItemConstructorOptions {
     const beforeClick = (): boolean => {
-      if (!this.state.api || !this.props.isConnected) {
-        atom.notifications.addError("Not connected to node");
-        return true;
-      }
+      // if (!this.state.api || !this.props.isConnected) {
+      //   atom.notifications.addError("Not connected to node");
+      //   return true;
+      // }
       return false;
     };
     const label = 'Deploy contract';
@@ -296,9 +330,11 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       this.props.addContract(contract);
       this.forceUpdate();
     };
-    return initMenuItem(label, true, AddExistingCode, confirm, {}, beforeClick, () => ({
+    return initMenuItem(label, true, DeployContract, confirm, {}, beforeClick, () => ({
       api: this.state.api,
       accounts: this.props.accounts,
+      codes: this.props.codes,
+      contracts: this.props.contracts,
     }));
   }
 
@@ -318,35 +354,30 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
 }
 
 export class ConnectionHandler {
-    public totalRetries = 0;
-    public maxRetries = 0;
-    public callback = () => {};
+  public totalRetries = 0;
+  public callback = (_: number) => {};
 
-    constructor(maxRetries: number, callback: () => void) {
-        this.maxRetries = maxRetries;
-        this.callback = callback;
-    }
+  constructor(callback: (totalRetries: number) => void) {
+    this.callback = callback;
+  }
 
-    static create(maxRetries: number, callback: () => void): (...args: any[]) => any {
-        const conhan = new ConnectionHandler(maxRetries, callback);
-        return conhan.handle.bind(conhan);
-    }
+  static create(callback: (totalRetries: number) => void): (...args: any[]) => any {
+    const conhan = new ConnectionHandler(callback);
+    return conhan.handle.bind(conhan);
+  }
 
-    handle(...args: any[]): any {
-        for (const arg of args) {
-            const msg = (arg as Error).message;
-            if (msg && msg.indexOf("Unable to find plain type for") !== -1) {
-                atom.notifications.addError("You have to specify types at extrinsic panel to connect");
-                this.callback();
-                return;
-            }
-        }
-        if (this.totalRetries >= this.maxRetries) {
-            this.callback();
-            return;
-        }
-        this.totalRetries++;
+  handle(...args: any[]): any {
+    for (const arg of args) {
+      const msg = (arg as Error).message;
+      if (msg && msg.indexOf("Unable to find plain type for") !== -1) {
+        atom.notifications.addError("You have to specify types at extrinsic panel to connect");
+        this.callback(this.totalRetries);
+        return;
+      }
     }
+    this.callback(this.totalRetries);
+    this.totalRetries++;
+  }
 }
 
 const mapStateToProps = (state: AppState) => ({

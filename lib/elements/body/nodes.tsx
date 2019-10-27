@@ -13,7 +13,7 @@ import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
 import { INode } from "../../store/modules/substrate/types";
 import { togglePanel } from "../../store/modules/tabs/actions";
-import { addNode, removeNode, editNode, updateConnectedNode } from "../../store/modules/substrate/actions";
+import { addNode, removeNode, editNode, updateConnectedNode, disconnect } from "../../store/modules/substrate/actions";
 
 const { Menu, MenuItem } = remote;
 
@@ -30,6 +30,7 @@ export interface Props {
   removeNode: typeof removeNode;
   editNode: typeof editNode;
   updateConnectedNode: typeof updateConnectedNode;
+  disconnect: typeof disconnect;
 };
 
 interface State {
@@ -46,11 +47,13 @@ class NodesBodyPanel extends React.Component<Props, State> {
       label: "Connect to node",
       click: this.connectToNode.bind(this),
     }, {
-      label: "Remove node",
-      click: this.removeNode.bind(this),
-    }, {
       label: "Edit node",
       click: this.editNode.bind(this),
+    }, {
+      separator: true,
+    }, {
+      label: "Remove node",
+      click: this.removeNode.bind(this),
     }],
   };
 
@@ -94,15 +97,18 @@ class NodesBodyPanel extends React.Component<Props, State> {
         onTabClick={() => this.props.togglePanel(val.id)}
         onActionsClick={() => this.state.tabMenu.popup({})}
       >
-        {nodes}
+        {nodes.length ? nodes : <div className="empty">No nodes found</div>}
       </TabComponent>
     );
   }
 
   private handleMenuClick(label: string, node: INode) {
     this.state.contextItems.forEach(val => {
+      if (val.separator) {
+        return;
+      }
       if (val.label === label) {
-        val.click(node);
+        val.click!(node);
         return;
       }
     })
@@ -168,6 +174,10 @@ class NodesBodyPanel extends React.Component<Props, State> {
   // }
 
   private removeNode(node: INode) {
+    if (this.props.connectedNode === node.name) {
+      this.props.disconnect();
+      this.props.updateConnectedNode(undefined);
+    }
     this.props.removeNode(node.name);
     this.forceUpdate();
   }
@@ -182,6 +192,7 @@ class NodesBodyPanel extends React.Component<Props, State> {
       EditNode, { node: oldNode },
       (node: INode) => {
         this.props.editNode(oldNode.name, node);
+        this.props.updateConnectedNode(node.name);
       },
       () => mod.hide(),
     );
@@ -216,5 +227,8 @@ const mapStateToProps = (state: AppState) => ({
 
 export default connect(
   mapStateToProps,
-  { togglePanel, addNode, removeNode, editNode, updateConnectedNode }
+  {
+    togglePanel, addNode, removeNode, editNode,
+    updateConnectedNode, disconnect,
+  }
 )(NodesBodyPanel);

@@ -40,9 +40,17 @@
   }
 
   &__item {
+    display: flex;
+    flex-direction: column;
     line-height: @select-height;
     background-color: @color;
     padding: 5px 1rem;
+
+    .description {
+      font-size: .9rem;
+      padding: 0;
+      color: #4b535e;
+    }
 
     &--selected {
       background-color: @color;

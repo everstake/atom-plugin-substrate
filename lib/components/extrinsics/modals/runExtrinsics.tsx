@@ -185,10 +185,11 @@ export class RunExtrinsics extends React.Component<Props, State> {
       const account = keyring.addFromJson(this.props.accounts[this.state.account]);
       const nonce = await con.query.system.accountNonce(account.address);
       const extrinsic = this.getExtrinsic().value;
-      const unsignedTransaction = extrinsic(...this.state.args);
+      const unsignedTx = extrinsic(...this.state.args);
       account.decodePkcs8(this.state.pass);
 
-      await unsignedTransaction.sign(account, { nonce: nonce as any }).send(({ events = [], status }: any) => {
+      const signedTx = await unsignedTx.sign(account, { nonce: nonce.toU8a() });
+      signedTx.send(({ events = [], status }: any) => {
         if (status.isFinalized) {
           const finalized = status.asFinalized.toHex();
           console.log(`Completed at block hash: ${finalized}`);

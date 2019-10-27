@@ -51,11 +51,13 @@ class AccountsBodyPanel extends React.Component<Props, State> {
       label: "Rename account",
       click: this.renameAccount.bind(this),
     }, {
-      label: "Remove account",
-      click: this.removeAccount.bind(this),
-    }, {
       label: "Export account",
       click: this.exportAccount.bind(this),
+    }, {
+      separator: true,
+    }, {
+      label: "Remove account",
+      click: this.removeAccount.bind(this),
     }],
     accountInput: { name: "", key: "" },
   };
@@ -91,7 +93,7 @@ class AccountsBodyPanel extends React.Component<Props, State> {
         onTabClick={() => this.props.togglePanel(val.id)}
         onActionsClick={() => this.state.tabMenu.popup({})}
       >
-        {accounts}
+        {accounts.length ? accounts : <div className="empty">No accounts found</div>}
       </TabComponent>
     );
   }
@@ -126,8 +128,11 @@ class AccountsBodyPanel extends React.Component<Props, State> {
 
   private handleAccountMenuClick(label: string, pair: KeyringPair$Json) {
     this.state.accountContextItems.forEach(val => {
+      if (val.separator) {
+        return;
+      }
       if (val.label === label) {
-        val.click(pair);
+        val.click!(pair);
         return;
       }
     })

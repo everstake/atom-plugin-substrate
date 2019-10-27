@@ -1,50 +1,55 @@
 import * as React from "react";
-import * as fs from "fs";
 import { ApiPromise } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
-import { remote } from "electron";
-import { compactAddLength } from '@polkadot/util';
+import { Abi } from '@polkadot/api-contract';
 
-import { FileInputComponent } from "../../inputs/file";
 import { ModalComponent } from "../../modal";
 import { DefaultButtonComponent } from "../../buttons/default";
 import { TextInputComponent } from "../../inputs/text";
-import { IAccount, ICode } from "../../../store/modules/substrate/types";
+import { IAccount, IContract } from "../../../store/modules/substrate/types";
 import { SelectInputComponent, Item } from "../../inputs/select";
 
 export interface Props {
   api: ApiPromise;
   accounts: IAccount[];
-  codes: ICode[];
+  contract: IContract;
   closeModal: () => void;
-  confirmClick: (code: ICode) => void;
+  confirmClick: () => void;
 };
 
 interface State {
   account: number;
   pass: string;
-  compiled_contract: {
-    path: string;
-    bytes?: Uint8Array;
-  };
-  code_bundle_name: string;
+  method: number;
+  endowment: string;
   max_gas: string;
+  args: string[];
 };
 
 const DefaultState: State = {
   account: -1,
   pass: "",
-  compiled_contract: {
-    path: "",
-  },
-  code_bundle_name: "",
-  max_gas: "",
+  method: -1,
+  endowment: "0",
+  max_gas: "500000",
+  args: [],
 };
 
-export class UploadWasm extends React.Component<Props, State> {
+export class CallContract extends React.Component<Props, State> {
   public state: State = DefaultState;
 
   public render(): JSX.Element {
+    const { abi } = new Abi(JSON.parse(this.props.contract.abi));
+    const contractMessages = abi.contract.messages;
+    const methods: Item[] = contractMessages.map(val => {
+      const args = val.args.map((arg: any) => `${arg.name}: ${arg.type.displayName}`);
+      const returns = val.returnType ? `: ${val.returnType.displayName}` : "";
+      return {
+        label: `🧭 ${val.name}(${args.join(', ')})${returns}`,
+        description: val.mutates ? 'Will mutate storage' : 'Won\'t mutate storage',
+        value: val,
+      };
+    });
     const accountItems: Item[] = this.props.accounts.map(val => ({
       label: val.meta.name,
       value: val,
@@ -52,26 +57,29 @@ export class UploadWasm extends React.Component<Props, State> {
 
     return (
       <ModalComponent className="run-extrinsics">
-        <FileInputComponent
-          className="path"
-          title="Contract code"
-          placeholder=".wasm file"
-          value={this.state.compiled_contract.path}
-          onClick={() => this.handleFileClick()}
+        <SelectInputComponent
+          className="method"
+          title="Select contract method"
+          items={methods}
+          selectedItem={this.state.method}
+          onChange={(_: Item, idx: number) => {
+            this.setState({ method: idx });
+          }}
         />
+        {this.renderArguments()}
         <TextInputComponent
-          className="name"
-          type="text"
-          title="Code bundle name"
-          placeholder="Flipper contract code"
-          value={this.state.code_bundle_name}
-          onChange={(val: string) => this.setState({ code_bundle_name: val })}
+          className="endowment"
+          type="number"
+          title="Allotted endowment"
+          placeholder="0"
+          value={this.state.endowment}
+          onChange={(val: string) => this.setState({ endowment: val })}
         />
         <TextInputComponent
           className="gas"
           type="number"
           title="Maximum gas"
-          placeholder="100000"
+          placeholder="500000"
           value={this.state.max_gas}
           onChange={(val: string) => this.setState({ max_gas: val })}
         />
@@ -106,89 +114,94 @@ export class UploadWasm extends React.Component<Props, State> {
     );
   }
 
-  private async handleFileClick() {
-    const files: any = await remote.dialog.showOpenDialog(
-      remote.getCurrentWindow(), {
-      properties: ['openFile'],
-    });
-    if (!files || !files.length) {
-      return;
+  private renderArguments(): JSX.Element {
+
+    const { method } = this.state;
+    const { abi } = new Abi(JSON.parse(this.props.contract.abi));
+    const md = abi.contract.messages[method];
+    if (!md) {
+      return <div></div>;
     }
-    const codePath = files[0];
-    try {
-      const wasm: Uint8Array = fs.readFileSync(codePath);
-      const isWasmValid = wasm.subarray(0, 4).join(',') === '0,97,115,109'; // '\0asm'
-      if (!isWasmValid) {
-          throw Error('Invalid code');
-      }
-      const compiled_contract = {
-        path: codePath,
-        bytes: compactAddLength(wasm),
-      };
-      this.setState({ compiled_contract });
-    } catch (err) {
-      atom.notifications.addError(`Failed to deserialize ABI: ${err.message}`);
+    const args = md.args.map((val: any, idx: number) => (
+      <TextInputComponent
+        key={idx}
+        className="argument"
+        type="text"
+        title={`${val.name}: ${val.type.displayName}`}
+        placeholder=""
+        value={this.state.args[idx] || ""}
+        onChange={(val: string) => {
+          const args = this.state.args;
+          args[idx] = val;
+          this.setState({ args });
+        }}
+      />
+    ));
+    if (!args.length) {
+      return <div></div>;
     }
+    return (<div className="arguments">{args}</div>);
   }
 
   private handleConfirm() {
-    const { account, compiled_contract, code_bundle_name, max_gas } = this.state;
+    const { account, method, endowment, max_gas } = this.state;
     if (account === -1) {
       atom.notifications.addError("Invalid account");
       return;
     }
-    if (!compiled_contract.bytes) {
-      atom.notifications.addError("Invalid compiled contract");
+    if (method === -1) {
+      atom.notifications.addError("Invalid contract method");
       return;
     }
-    if (!code_bundle_name.trim().length) {
-      atom.notifications.addError("Invalid code bundle name");
+    if (!endowment.trim().length) {
+      atom.notifications.addError("Invalid endowment");
       return;
     }
     if (!max_gas.trim().length) {
       atom.notifications.addError("Invalid maximum gas");
       return;
     }
-    this.exec((address: string) => {
-      this.props.confirmClick({ name: code_bundle_name, address });
-    }).catch(err => {
+    this.exec().catch(err => {
       atom.notifications.addError(`Upload wasm failed with error: ${err.message}`);
     });
     this.props.closeModal();
   }
 
-  private async exec(callback: (address: string) => void) {
-    const { account, pass, compiled_contract, max_gas } = this.state;
+  private async exec() {
+    const { account, method, pass, max_gas, endowment, args } = this.state;
     const acc = this.props.accounts[account];
     const keyring = new Keyring({ type: "sr25519" });
     const pair = keyring.addFromJson(acc);
     pair.decodePkcs8(pass);
 
     try {
+      const contractAbi = new Abi(JSON.parse(this.props.contract.abi));
       const con = this.props.api;
       const nonce = await con.query.system.accountNonce(pair.address);
       const contractApi = con.tx["contracts"] ? con.tx["contracts"] : con.tx["contract"];
-      const unsignedTransaction = contractApi.putCode(max_gas, compiled_contract.bytes);
 
-      const signedTransaction = unsignedTransaction.sign(pair, { nonce: nonce as any });
-      await signedTransaction.send(({ events = [], status }: any) => {
+      const methodName = contractAbi.abi.contract.messages[method].name;
+      const md = contractAbi.messages[methodName];
+
+      const unsignedTx = contractApi.call(
+        this.props.contract.address,
+        endowment,
+        max_gas,
+        md(...args),
+      );
+
+      const signedTx = unsignedTx.sign(pair, { nonce: nonce as any });
+      await signedTx.send(({ events = [], status }: any) => {
         if (status.isFinalized) {
           const finalized = status.asFinalized.toHex();
           console.log(`Completed at block hash: ${finalized}`);
 
           console.log('Events:');
           let error: string = '';
-          let resultHash: string = '';
           events.forEach(({ phase, event: { data, method, section } }: any) => {
             const res = `\t ${phase.toString()} : ${section}.${method} ${data.toString()}`;
             if (res.indexOf('Failed') !== -1) {
               error += res;
-            }
-            if (res.indexOf('contracts.CodeStored') !== -1) {
-              resultHash = res.substring(
-                res.lastIndexOf('["') + 2,
-                res.lastIndexOf('"]'),
-              );
             }
             console.log(res);
           });
@@ -197,12 +210,7 @@ export class UploadWasm extends React.Component<Props, State> {
             atom.notifications.addError(`Failed on block "${finalized}" with error: ${error}`);
             return;
           }
-          if (resultHash === '') {
-            atom.notifications.addInfo(`Completed on block "${finalized}" but failed to get event result`);
-            return;
-          }
-          callback(resultHash);
-          atom.notifications.addSuccess(`Completed on block ${finalized} with code hash ${resultHash}`);
+          atom.notifications.addSuccess(`Completed on block ${finalized}`);
         }
       });
     } catch (err) {

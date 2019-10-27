@@ -7,8 +7,9 @@ import { INode } from "../../store/modules/substrate/types";
 const { Menu, MenuItem } = remote;
 
 export interface ContextItem {
-  label: string;
-  click: (node: INode) => void;
+  label?: string;
+  click?: (node: INode) => void;
+  separator?: boolean;
 }
 
 export interface Props {
@@ -74,8 +75,11 @@ export class NodeComponent extends React.Component<Props, State> {
   }
 
   private initAccountsMenuItems(): MenuItemType[] {
-    return this.props.accountContextItems.map(val =>
-      this.initContext(val.label, true),
-    );
+    return this.props.accountContextItems.map(val => {
+      if (val.separator) {
+        return new MenuItem({ type: "separator" });
+      }
+      return this.initContext(val.label!, true);
+    });
   }
 }

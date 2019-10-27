@@ -6,8 +6,9 @@ import { KeyringPair$Json } from "@polkadot/keyring/types";
 const { Menu, MenuItem } = remote;
 
 export interface ContextItem {
-  label: string;
-  click: (pair: KeyringPair$Json) => void;
+  label?: string;
+  click?: (pair: KeyringPair$Json) => void;
+  separator?: boolean;
 }
 
 export type Props = {
@@ -61,8 +62,11 @@ export class AccountComponent extends React.Component<Props, State> {
   }
 
   private initAccountsMenuItems(): MenuItemType[] {
-    return this.props.accountContextItems.map(val =>
-      this.initContext(val.label, true),
-    );
+    return this.props.accountContextItems.map(val => {
+      if (val.separator) {
+        return new MenuItem({ type: "separator" });
+      }
+      return this.initContext(val.label!, true);
+    });
   }
 }

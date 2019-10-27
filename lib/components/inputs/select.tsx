@@ -2,6 +2,7 @@ import * as React from "react";
 
 export interface Item {
   label: string;
+  description?: string;
   value?: any;
 };
 
@@ -64,7 +65,8 @@ export class SelectInputComponent extends React.Component<Props, State> {
           className={`ui-select__item ${itemClass}`}
           onClick={() => this.handleItemClick(item, idx)}
         >
-          {item.label}
+          <span className="label">{item.label}</span>
+          {item.description ? <span className="description">{item.description}</span> : undefined}
         </li>
       )
     })
