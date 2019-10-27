@@ -8,8 +8,8 @@ import configureStore from "./store";
 import { setPanels } from "./store/modules/tabs/actions";
 import { addNode } from "./store/modules/substrate/actions";
 
-type State = {
-  reduxState: string,
+interface State {
+  reduxState: string;
 };
 
 module.exports = new class SubstratePlugin {
@@ -32,6 +32,7 @@ module.exports = new class SubstratePlugin {
   }
 
   public activate(state?: State) {
+    this.installDeps();
     if (atom.inDevMode()) {
       try {
         this.activatePlugin(state);
@@ -84,7 +85,8 @@ module.exports = new class SubstratePlugin {
       const reduxState = JSON.parse(rdxState);
       this.props.store = configureStore(reduxState);
     }
-    if (!this.props.store.getState().tabs.panels.length) {
+    const reduxState = this.props.store.getState();
+    if (!reduxState.tabs.panels.length) {
       const setPanelsAction = setPanels([{
         id: 0,
         title: "My node connections",
@@ -100,10 +102,17 @@ module.exports = new class SubstratePlugin {
       }]);
       this.props.store.dispatch(setPanelsAction);
     }
-    if (!this.props.store.getState().substrate.nodes.length) {
+    if (!reduxState.substrate.nodes.length) {
       const addNodeAction = addNode("Default", "ws://127.0.0.1:9944");
       this.props.store.dispatch(addNodeAction);
     }
+  }
+
+  private async installDeps() {
+    const deps = require("atom-package-deps");
+    await deps.install("atom-ide-ui");
+    await deps.install("language-rust");
+    console.log('All dependencies installed, starting plugin.');
   }
 
   private async toggle() {}
