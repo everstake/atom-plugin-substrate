@@ -1,15 +1,12 @@
 import * as React from "react";
-import * as fs from "fs";
 import { ApiPromise } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
-import { remote } from "electron";
 import { Abi } from '@polkadot/api-contract';
 
-import { FileInputComponent } from "../../inputs/file";
 import { ModalComponent } from "../../modal";
 import { DefaultButtonComponent } from "../../buttons/default";
 import { TextInputComponent } from "../../inputs/text";
-import { IAccount, ICode, IContract } from "../../../store/modules/substrate/types";
+import { IAccount, IContract } from "../../../store/modules/substrate/types";
 import { SelectInputComponent, Item } from "../../inputs/select";
 
 export interface Props {
@@ -23,55 +20,58 @@ export interface Props {
 interface State {
   account: number;
   pass: string;
-  code: number,
-  abi: {
-    path: string;
-    abiJson?: string;
-  };
-  contract_name: string;
+  method: number;
   endowment: string;
   max_gas: string;
+  args: string[];
 };
 
 const DefaultState: State = {
   account: -1,
   pass: "",
-  code: -1,
-  abi: {
-    path: "",
-  },
-  contract_name: "",
-  endowment: "",
-  max_gas: "",
+  method: -1,
+  endowment: "0",
+  max_gas: "500000",
+  args: [],
 };
 
 export class CallContract extends React.Component<Props, State> {
   public state: State = DefaultState;
 
   public render(): JSX.Element {
+    const { abi } = new Abi(JSON.parse(this.props.contract.abi));
+    const contractMessages = abi.contract.messages;
+    const methods: Item[] = contractMessages.map(val => {
+      const args = val.args.map((arg: any) => `${arg.name}: ${arg.type.displayName}`);
+      const returns = val.returnType ? `: ${val.returnType.displayName}` : "";
+      return {
+        label: `🧭 ${val.name}(${args.join(', ')})${returns}`,
+        description: val.mutates ? 'Will mutate storage' : 'Won\'t mutate storage',
+        value: val,
+      };
+    });
+    const accountItems: Item[] = this.props.accounts.map(val => ({
+      label: val.meta.name,
+      value: val,
+    }));
+
     return (
       <ModalComponent className="run-extrinsics">
-        <TextInputComponent
-          className="name"
-          type="text"
-          title="Contract name"
-          placeholder="Flipper contract"
-          value={this.state.contract_name}
-          onChange={(val: string) => this.setState({ contract_name: val })}
-        />
-        <FileInputComponent
-          className="path"
-          title="Contract ABI"
-          placeholder=".json file"
-          value={this.state.abi.path}
-          onClick={() => this.handleFileClick()}
+        <SelectInputComponent
+          className="method"
+          title="Select contract method"
+          items={methods}
+          selectedItem={this.state.method}
+          onChange={(_: Item, idx: number) => {
+            this.setState({ method: idx });
+          }}
         />
         {this.renderArguments()}
         <TextInputComponent
           className="endowment"
           type="number"
           title="Allotted endowment"
-          placeholder="1000000000000000"
+          placeholder="0"
           value={this.state.endowment}
           onChange={(val: string) => this.setState({ endowment: val })}
         />
@@ -115,103 +115,79 @@ export class CallContract extends React.Component<Props, State> {
   }
 
   private renderArguments(): JSX.Element {
-    // const tx = this.getExtrinsic();
-    // if (!tx) {
-      return <div></div>;
-    // }
-    // const ext = tx.value.toJSON();
-    // const args = ext.args.map((val: { name: string, type: string }, idx: number) => (
-    //   <TextInputComponent
-    //     key={idx}
-    //     className="argument"
-    //     type="text"
-    //     title={`${val.name}: ${val.type}`}
-    //     placeholder=""
-    //     value={this.state.args[idx] || ""}
-    //     onChange={(val: string) => {
-    //       const args = this.state.args;
-    //       args[idx] = val;
-    //       this.setState({ args });
-    //     }}
-    //   />
-    // ));
-    // return (<div className="arguments">{args}</div>);
-  }
 
-  private async handleFileClick() {
-    const files: any = await remote.dialog.showOpenDialog(
-      remote.getCurrentWindow(), {
-      properties: ['openFile'],
-    });
-    if (!files || !files.length) {
-      return;
+    const { method } = this.state;
+    const { abi } = new Abi(JSON.parse(this.props.contract.abi));
+    const md = abi.contract.messages[method];
+    if (!md) {
+      return <div></div>;
     }
-    const codePath = files[0];
-    try {
-      const abiBytes: Uint8Array = fs.readFileSync(codePath);
-      const abiJson = JSON.parse(abiBytes.toString());
-      new Abi(abiJson);
-      const abi = {
-        path: files[0],
-        abiJson: JSON.stringify(abiJson),
-      };
-      this.setState({ abi });
-    } catch (err) {
-      atom.notifications.addError(`Failed to deserialize ABI: ${err.message}`);
+    const args = md.args.map((val: any, idx: number) => (
+      <TextInputComponent
+        key={idx}
+        className="argument"
+        type="text"
+        title={`${val.name}: ${val.type.displayName}`}
+        placeholder=""
+        value={this.state.args[idx] || ""}
+        onChange={(val: string) => {
+          const args = this.state.args;
+          args[idx] = val;
+          this.setState({ args });
+        }}
+      />
+    ));
+    if (!args.length) {
+      return <div></div>;
     }
+    return (<div className="arguments">{args}</div>);
   }
 
   private handleConfirm() {
-    const { account, code, abi, max_gas, contract_name, endowment } = this.state;
+    const { account, method, endowment, max_gas } = this.state;
     if (account === -1) {
       atom.notifications.addError("Invalid account");
       return;
     }
-    if (code === -1) {
-      atom.notifications.addError("Invalid contract code");
-      return;
-    }
-    if (!abi.abiJson) {
-      atom.notifications.addError("Invalid ABI");
-      return;
-    }
-    if (!contract_name.trim().length) {
-      atom.notifications.addError("Invalid contract name");
-      return;
-    }
-    if (!max_gas.trim().length) {
-      atom.notifications.addError("Invalid maximum gas");
+    if (method === -1) {
+      atom.notifications.addError("Invalid contract method");
       return;
     }
     if (!endowment.trim().length) {
       atom.notifications.addError("Invalid endowment");
       return;
     }
-    this.exec((address: string) => {
-      this.props.confirmClick({ name: contract_name, address, abi: abi.abiJson! });
-    }).catch(err => {
+    if (!max_gas.trim().length) {
+      atom.notifications.addError("Invalid maximum gas");
+      return;
+    }
+    this.exec().catch(err => {
       atom.notifications.addError(`Upload wasm failed with error: ${err.message}`);
     });
     this.props.closeModal();
   }
 
-  private async exec(callback: (address: string) => void) {
-    const { account, pass, code, abi, max_gas, endowment, args } = this.state;
+  private async exec() {
+    const { account, method, pass, max_gas, endowment, args } = this.state;
     const acc = this.props.accounts[account];
     const keyring = new Keyring({ type: "sr25519" });
     const pair = keyring.addFromJson(acc);
     pair.decodePkcs8(pass);
 
     try {
-      const contractAbi = new Abi(JSON.parse(abi.abiJson!));
+      const contractAbi = new Abi(JSON.parse(this.props.contract.abi));
       const con = this.props.api;
       const nonce = await con.query.system.accountNonce(pair.address);
       const contractApi = con.tx["contracts"] ? con.tx["contracts"] : con.tx["contract"];
-      const unsignedTx = contractApi.instantiate(
-          endowment,
-          max_gas,
-          this.props.codes[code].address,
-          contractAbi.constructors[0](...args),
+
+      const methodName = contractAbi.abi.contract.messages[method].name;
+      const md = contractAbi.messages[methodName];
+
+      const unsignedTx = contractApi.call(
+        this.props.contract.address,
+        endowment,
+        max_gas,
+        md(...args),
       );
 
       const signedTx = unsignedTx.sign(pair, { nonce: nonce as any });
@@ -222,17 +198,10 @@ export class CallContract extends React.Component<Props, State> {
 
           console.log('Events:');
           let error: string = '';
-          let resultHash: string = '';
           events.forEach(({ phase, event: { data, method, section } }: any) => {
             const res = `\t ${phase.toString()} : ${section}.${method} ${data.toString()}`;
             if (res.indexOf('Failed') !== -1) {
               error += res;
-            }
-            if (res.indexOf('contracts.Instantiated') !== -1) {
-              resultHash = res.substring(
-                res.lastIndexOf(',"') + 2,
-                res.lastIndexOf('"]'),
-              );
             }
             console.log(res);
           });
@@ -241,12 +210,7 @@ export class CallContract extends React.Component<Props, State> {
             atom.notifications.addError(`Failed on block "${finalized}" with error: ${error}`);
             return;
           }
-          if (resultHash === '') {
-            atom.notifications.addInfo(`Completed on block "${finalized}" but failed to get event result`);
-            return;
-          }
-          callback(resultHash);
-          atom.notifications.addSuccess(`Completed on block ${finalized} with code hash ${resultHash}`);
+          atom.notifications.addSuccess(`Completed on block ${finalized}`);
         }
       });
     } catch (err) {

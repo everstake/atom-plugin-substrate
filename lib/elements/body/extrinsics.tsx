@@ -71,9 +71,9 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       click: this.forgetCodeHash.bind(this),
     }],
     contractContextItems: [{
-    //   label: "Call contract",
-    //   click: this.callContract.bind(this),
-    // }, {
+      label: "Call contract",
+      click: this.callContract.bind(this),
+    }, {
       label: "Copy hash",
       click: this.copyHash.bind(this),
     }, {
@@ -204,9 +204,11 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
           ...types,
         },
       });
-      api.on("error", ConnectionHandler.create(999, () => {
-        atom.notifications.addError("Failed to connect");
-        api.disconnect();
+      api.on("error", ConnectionHandler.create((totalRetries: number) => {
+        if (totalRetries >= 5) {
+          atom.notifications.addError("Failed to connect");
+          api.disconnect();
+        }
         this.props.disconnect();
       }));
       await api.isReady;
@@ -292,16 +294,17 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
     };
     return initMenuItem(label, true, AddExistingContract, confirm, {});
   }
-  //
-  // private callContract(contract: IContract) {
-  //   const mod = initAccountContextItemModal(CallContract, {
-  //     api: this.state.api,
-  //     contract,
-  //   }, () => {
-  //     // this.props.renameAccount(pair.meta.name, name);
-  //   }, () => mod.hide());
-  //   mod.show();
-  // }
+
+  private callContract(contract: IContract) {
+    const mod = initAccountContextItemModal(CallContract, {
+      api: this.state.api,
+      accounts: this.props.accounts,
+      contract,
+    }, () => {
+      // this.props.renameAccount(pair.meta.name, name);
+    }, () => mod.hide());
+    mod.show();
+  }
 
   private deployContract(): MenuItemConstructorOptions {
     const beforeClick = (): boolean => {
@@ -340,35 +343,30 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
 }
 
 export class ConnectionHandler {
-    public totalRetries = 0;
-    public maxRetries = 0;
-    public callback = () => {};
+  public totalRetries = 0;
+  public callback = (_: number) => {};
 
-    constructor(maxRetries: number, callback: () => void) {
-        this.maxRetries = maxRetries;
-        this.callback = callback;
-    }
+  constructor(callback: (totalRetries: number) => void) {
+    this.callback = callback;
+  }
 
-    static create(maxRetries: number, callback: () => void): (...args: any[]) => any {
-        const conhan = new ConnectionHandler(maxRetries, callback);
-        return conhan.handle.bind(conhan);
-    }
+  static create(callback: (totalRetries: number) => void): (...args: any[]) => any {
+    const conhan = new ConnectionHandler(callback);
+    return conhan.handle.bind(conhan);
+  }
 
-    handle(...args: any[]): any {
-        for (const arg of args) {
-            const msg = (arg as Error).message;
-            if (msg && msg.indexOf("Unable to find plain type for") !== -1) {
-                atom.notifications.addError("You have to specify types at extrinsic panel to connect");
-                this.callback();
-                return;
-            }
-        }
-        if (this.totalRetries >= this.maxRetries) {
-            this.callback();
-            return;
-        }
-        this.totalRetries++;
+  handle(...args: any[]): any {
+    for (const arg of args) {
+      const msg = (arg as Error).message;
+      if (msg && msg.indexOf("Unable to find plain type for") !== -1) {
+        atom.notifications.addError("You have to specify types at extrinsic panel to connect");
+        this.callback(this.totalRetries);
+        return;
+      }
     }
+    this.callback(this.totalRetries);
+    this.totalRetries++;
+  }
 }
 
 const mapStateToProps = (state: AppState) => ({
