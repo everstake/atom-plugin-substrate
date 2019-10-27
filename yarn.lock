@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3":
+"@babel/runtime@^7.5.5", "@babel/runtime@^7.6.0", "@babel/runtime@^7.6.3":
   version "7.6.3"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.6.3.tgz#935122c74c73d2240cafd32ddb5fc2a6cd35cf1f"
   integrity sha512-kq6anf9JGjW8Nt5rYfEuGRaEAaH1mkv3Bbu6rYvLOpPh/RusSJXuKPEAoZ7L7gybZkchE8+NV5g9vKF4AGAtsA==
@@ -57,7 +57,16 @@
   dependencies:
     "@babel/runtime" "^7.6.3"
 
-"@polkadot/keyring@^1.4.1", "@polkadot/keyring@^1.6.1":
+"@polkadot/keyring@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/keyring/-/keyring-1.4.1.tgz#d563b9118bc6ba6b8270a8ccd6b4f290fea81876"
+  integrity sha512-AP3lQJYFlsFt2Ub8dIyEA6u3fkdWg6wmhLeAO0YnmLfH3w/zqHO+59k8cnggcijROBJsEyejh7phOlaOw8N8nQ==
+  dependencies:
+    "@babel/runtime" "^7.6.0"
+    "@polkadot/util" "^1.4.1"
+    "@polkadot/util-crypto" "^1.4.1"
+
+"@polkadot/keyring@^1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@polkadot/keyring/-/keyring-1.6.1.tgz#35966afba142b647b31767e3a349652947c57a90"
   integrity sha512-ortPbweoaANKTKZR0JDbO796U6B3JGjj87yZD+ghlFRUWjMjlbP+LOWnfNyXHcI87yxNC23nK3YDv1KCl0eDUQ==
@@ -103,6 +112,28 @@
     "@types/memoizee" "^0.4.3"
     memoizee "^0.4.14"
 
+"@polkadot/util-crypto@1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/util-crypto/-/util-crypto-1.4.1.tgz#d49acf2820b714ac3149122a904a26bcc4cd469a"
+  integrity sha512-swcQR8gmcI4/CkJVpJ8m07HLFLvmcKgr59S6JWVtGTCf5BPA8/Ha5jlWrF7tYF6WXhhD9MD3XSW2F5YlRe4bgA==
+  dependencies:
+    "@babel/runtime" "^7.6.0"
+    "@polkadot/util" "^1.4.1"
+    "@polkadot/wasm-crypto" "^0.14.1"
+    "@types/bip39" "^2.4.2"
+    "@types/bs58" "^4.0.0"
+    "@types/pbkdf2" "^3.0.0"
+    "@types/secp256k1" "^3.5.0"
+    "@types/xxhashjs" "^0.2.1"
+    base-x "3.0.5"
+    bip39 "^2.5.0"
+    blakejs "^1.1.0"
+    bs58 "^4.0.1"
+    js-sha3 "^0.8.0"
+    secp256k1 "^3.7.0"
+    tweetnacl "^1.0.1"
+    xxhashjs "^0.2.2"
+
 "@polkadot/util-crypto@^1.4.1", "@polkadot/util-crypto@^1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@polkadot/util-crypto/-/util-crypto-1.6.1.tgz#6d924c5eaecbf98f971da1aac69fb60b17a4bf55"
@@ -125,7 +156,7 @@
     tweetnacl "^1.0.1"
     xxhashjs "^0.2.2"
 
-"@polkadot/util@^1.6.1":
+"@polkadot/util@^1.4.1", "@polkadot/util@^1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@polkadot/util/-/util-1.6.1.tgz#8110c12a1670e564c5d6a1c19347cbb0dba8a3ce"
   integrity sha512-uKRfapAXwZMcWQ24MdV+zg8jrYtidbKxJhUbq0G77Yy27d45OID8d+JcI3Q+d6d2pmC/h733iSeCqdiLYCKqMw==

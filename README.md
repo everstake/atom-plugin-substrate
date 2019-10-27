@@ -19,14 +19,14 @@ You can install this package through the default [package manager](https://fligh
 
 1. Clone project and open it in `Atom`.
 2. Install dependencies with command `yarn` in terminal.
-3. Instal package to your local `Atom` editor with `apm install`.
+3. Instal package to your local `Atom` editor with `apm install --yarn`.
 
 ## To start development
 
 1. Clone project and open it in `Atom`.
 2. Install dependencies with command `yarn` in terminal.
-3. Install package to your local `Atom` editor as dev package with `apm install --dev`.
-4. Link project to dev packages with `apm link --dev`.
+3. Install package to your local `Atom` editor as dev package with `apm install --yarn --dev`.
+4. Link project to dev packages with `apm link --yarn --dev`.
 
 ## Features
 

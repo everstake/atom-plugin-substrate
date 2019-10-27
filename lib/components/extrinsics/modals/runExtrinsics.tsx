@@ -188,8 +188,8 @@ export class RunExtrinsics extends React.Component<Props, State> {
       const unsignedTx = extrinsic(...this.state.args);
       account.decodePkcs8(this.state.pass);
 
-      const signedTx = await unsignedTx.sign(account, { nonce: nonce.toU8a() });
-      signedTx.send(({ events = [], status }: any) => {
+      const signedTx = unsignedTx.sign(account, { nonce: nonce as any });
+      await signedTx.send(({ events = [], status }: any) => {
         if (status.isFinalized) {
           const finalized = status.asFinalized.toHex();
           console.log(`Completed at block hash: ${finalized}`);

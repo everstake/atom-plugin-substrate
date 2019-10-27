@@ -49,7 +49,7 @@ export class AddNode extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Add account"
+            title="Add node"
             onClick={this.handleConfirm.bind(this)}
           />
         </div>
