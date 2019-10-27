@@ -111,7 +111,7 @@ module.exports = new class SubstratePlugin {
   private async installDeps() {
     const deps = require("atom-package-deps");
     await deps.install("atom-ide-ui");
-    await deps.install("language-rust");
+    await deps.install("ide-rust");
     console.log('All dependencies installed, starting plugin.');
   }
 
