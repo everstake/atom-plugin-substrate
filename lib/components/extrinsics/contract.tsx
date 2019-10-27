@@ -7,8 +7,9 @@ import { IContract } from "../../store/modules/substrate/types";
 const { Menu, MenuItem } = remote;
 
 export interface ContractContextItem {
-  label: string;
-  click: (contract: IContract) => void;
+  label?: string;
+  click?: (contract: IContract) => void;
+  separator?: boolean;
 }
 
 export interface Props {
@@ -62,8 +63,11 @@ export class ContractComponent extends React.Component<Props, State> {
   }
 
   private initAccountsMenuItems(): MenuItemType[] {
-    return this.props.accountContextItems.map(val =>
-      this.initContext(val.label, true),
-    );
+    return this.props.accountContextItems.map(val => {
+      if (val.separator) {
+        return new MenuItem({ type: "separator" });
+      }
+      return this.initContext(val.label!, true);
+    });
   }
 }

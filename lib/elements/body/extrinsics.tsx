@@ -74,6 +74,8 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       label: "Call contract",
       click: this.callContract.bind(this),
     }, {
+      separator: true,
+    }, {
       label: "Copy hash",
       click: this.copyHash.bind(this),
     }, {
@@ -140,8 +142,11 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
           accountContextItems={this.state.contractContextItems}
           onClick={(label: string, contract: IContract) => {
             this.state.contractContextItems.forEach(val => {
+              if (val.separator) {
+                return;
+              }
               if (val.label === label) {
-                val.click(contract);
+                val.click!(contract);
                 return;
               }
             })
@@ -149,7 +154,15 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
         />
       );
     });
+    const isEmpty = codes.length <= 0 && contracts.length <= 0;
     const showSeparator = codes.length <= 0 || contracts.length <= 0;
+    const data = (
+      <div>
+        {codes}
+        {showSeparator ? undefined : <div className="separator"></div>}
+        {contracts}
+      </div>
+    );
     return (
       <TabComponent
         className="extrinsics"
@@ -157,9 +170,7 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
         onTabClick={() => this.props.togglePanel(val.id)}
         onActionsClick={() => this.state.tabMenu.popup({})}
       >
-        {codes}
-        {showSeparator ? undefined : <div className="separator"></div>}
-        {contracts}
+        {!isEmpty ? data : <div className="empty">No codes or contracts found</div>}
       </TabComponent>
     );
   }
