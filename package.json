@@ -1,7 +1,7 @@
 {
   "name": "substrate-plugin",
   "main": "./lib/index",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Plugin for Parity Substrate",
   "keywords": [
     "substrate",
