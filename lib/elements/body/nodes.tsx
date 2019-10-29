@@ -192,7 +192,9 @@ class NodesBodyPanel extends React.Component<Props, State> {
       EditNode, { node: oldNode },
       (node: INode) => {
         this.props.editNode(oldNode.name, node);
-        this.props.updateConnectedNode(node.name);
+        if (this.props.connectedNode === oldNode.name) {
+          this.props.updateConnectedNode(node.name);
+        }
       },
       () => mod.hide(),
     );
