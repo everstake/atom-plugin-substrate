@@ -200,7 +200,7 @@ export class RunExtrinsics extends React.Component<Props, State> {
       const extrinsic = this.getExtrinsic().value;
       const unsignedTx = extrinsic(...args);
 
-      const signedTx = unsignedTx.sign(account, { nonce: nonce as any });
+      const signedTx = unsignedTx.sign(pair, { nonce: nonce as any });
       await signedTx.send(({ events = [], status }: any) => {
         if (status.isFinalized) {
           const finalized = status.asFinalized.toHex();
