@@ -158,7 +158,7 @@ class AccountsBodyPanel extends React.Component<Props, State> {
   private async renameAccount(pair: KeyringPair$Json) {
     const mod = initAccountContextItemModal(RenameAccount, { pair }, (name: string) => {
       this.props.renameAccount(pair.meta.name, name);
-    }, () => mod.hide());
+    }, () => mod.destroy());
     mod.show();
   }
 }

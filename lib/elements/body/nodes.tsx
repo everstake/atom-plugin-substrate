@@ -197,7 +197,7 @@ class NodesBodyPanel extends React.Component<Props, State> {
         }
         this.forceUpdate();
       },
-      () => mod.hide(),
+      () => mod.destroy(),
     );
     mod.show();
   }

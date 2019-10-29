@@ -310,7 +310,7 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       api: this.state.api,
       accounts: this.props.accounts,
       contract,
-    }, () => {}, () => mod.hide());
+    }, () => {}, () => mod.destroy());
     mod.show();
   }
 
