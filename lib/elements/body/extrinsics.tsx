@@ -199,8 +199,7 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       const buf = fs.readFileSync(filePath);
       return JSON.parse(buf.toString());
     } catch (err) {
-      atom.notifications.addError(`File with types not found: ${err.message}`);
-      return;
+      return {};
     }
   }
 

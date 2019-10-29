@@ -31,7 +31,7 @@ export type ActionTypes =
   | IAddContractSubstrateAction
   | IRemoveContractSubstrateAction;
 
-const initialState: SubstrateState = {
+export const initialState: SubstrateState = {
   isConnected: false,
   accounts: [],
   nodes: [],

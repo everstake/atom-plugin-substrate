@@ -5,7 +5,7 @@ import {
 
 export type ActionTypes = ITogglePanelAction | ISetTabsAction;
 
-const initialState: TabsState = {
+export const initialState: TabsState = {
   panels: [],
 };
 

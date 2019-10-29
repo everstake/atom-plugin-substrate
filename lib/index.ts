@@ -6,6 +6,8 @@ import * as Path from "path";
 import { SidebarPanel, Props } from "./elements/sidebar";
 import configureStore from "./store";
 import { setPanels } from "./store/modules/tabs/actions";
+import { initialState as tabsIS } from "./store/modules/tabs/reducers";
+import { initialState as substrateIS } from "./store/modules/substrate/reducers";
 import { addNode } from "./store/modules/substrate/actions";
 
 interface State {
@@ -81,9 +83,7 @@ module.exports = new class SubstratePlugin {
       })
     );
     if (state) {
-      const rdxState = !state.reduxState.length ? "{}" : state.reduxState;
-      const reduxState = JSON.parse(rdxState);
-      this.props.store = configureStore(reduxState);
+      this.props.store = this.getState(state);
     }
     const reduxState = this.props.store.getState();
     if (!reduxState.tabs.panels.length) {
@@ -106,6 +106,21 @@ module.exports = new class SubstratePlugin {
       const addNodeAction = addNode("Default", "ws://127.0.0.1:9944");
       this.props.store.dispatch(addNodeAction);
     }
+  }
+
+  private getState(state: State): any {
+    const rdst = state.reduxState;
+    if (!rdst) {
+      return;
+    }
+    if (rdst.length) {
+      const reduxState = JSON.parse(state.reduxState);
+      return configureStore(reduxState);
+    }
+    return {
+      tabs: tabsIS,
+      substrate: substrateIS,
+    };
   }
 
   private async installDeps() {
