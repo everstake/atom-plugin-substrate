@@ -98,7 +98,7 @@ export class UploadWasm extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Add existing code"
+            title="Upload WASM"
             onClick={() => this.handleConfirm()}
           />
         </div>
@@ -153,16 +153,25 @@ export class UploadWasm extends React.Component<Props, State> {
       this.props.confirmClick({ name: code_bundle_name, address });
     }).catch(err => {
       atom.notifications.addError(`Upload wasm failed with error: ${err.message}`);
+    }).finally(() => {
+      this.setState(DefaultState);
     });
     this.props.closeModal();
   }
 
   private async exec(callback: (address: string) => void) {
     const { account, pass, compiled_contract, max_gas } = this.state;
-    const acc = this.props.accounts[account];
-    const keyring = new Keyring({ type: "sr25519" });
-    const pair = keyring.addFromJson(acc);
-    pair.decodePkcs8(pass);
+
+    let pair;
+    try {
+      const acc = this.props.accounts[account];
+      const keyring = new Keyring({ type: "sr25519" });
+      pair = keyring.addFromJson(acc);
+      pair.decodePkcs8(pass);
+    } catch (err) {
+      atom.notifications.addError(`Failed to decrypt account: ${err.message}`);
+      return;
+    }
 
     try {
       const con = this.props.api;

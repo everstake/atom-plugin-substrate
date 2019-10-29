@@ -58,7 +58,7 @@ export class EditNode extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Rename account"
+            title="Edit node"
             onClick={this.handleConfirm.bind(this)}
           />
         </div>

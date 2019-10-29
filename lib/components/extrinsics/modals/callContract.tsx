@@ -106,7 +106,7 @@ export class CallContract extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Add existing code"
+            title="Call contract"
             onClick={() => this.handleConfirm()}
           />
         </div>
@@ -163,16 +163,25 @@ export class CallContract extends React.Component<Props, State> {
     }
     this.exec().catch(err => {
       atom.notifications.addError(`Upload wasm failed with error: ${err.message}`);
+    }).finally(() => {
+      this.setState(DefaultState);
     });
     this.props.closeModal();
   }
 
   private async exec() {
     const { account, method, pass, max_gas, endowment, args } = this.state;
-    const acc = this.props.accounts[account];
-    const keyring = new Keyring({ type: "sr25519" });
-    const pair = keyring.addFromJson(acc);
-    pair.decodePkcs8(pass);
+
+    let pair;
+    try {
+      const acc = this.props.accounts[account];
+      const keyring = new Keyring({ type: "sr25519" });
+      pair = keyring.addFromJson(acc);
+      pair.decodePkcs8(pass);
+    } catch (err) {
+      atom.notifications.addError(`Failed to decrypt account: ${err.message}`);
+      return;
+    }
 
     try {
       const contractAbi = new Abi(JSON.parse(this.props.contract.abi));

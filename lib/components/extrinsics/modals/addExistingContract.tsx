@@ -68,7 +68,7 @@ export class AddExistingContract extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Add existing code"
+            title="Add existing contract"
             onClick={() => this.handleConfirm()}
           />
         </div>

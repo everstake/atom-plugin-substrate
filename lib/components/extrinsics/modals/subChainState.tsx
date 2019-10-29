@@ -64,7 +64,7 @@ export class SubChainState extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Confirm"
+            title="Subscribe for chain state"
             onClick={() => this.handleConfirm()}
           />
         </div>

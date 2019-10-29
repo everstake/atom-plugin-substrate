@@ -218,8 +218,8 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
         if (totalRetries >= 5) {
           atom.notifications.addError("Failed to connect");
           api.disconnect();
+          this.props.disconnect();
         }
-        this.props.disconnect();
       }));
       await api.isReady;
       this.setState({ api });
@@ -310,18 +310,16 @@ class ExtrinsicsBodyPanel extends React.Component<Props, State> {
       api: this.state.api,
       accounts: this.props.accounts,
       contract,
-    }, () => {
-      // this.props.renameAccount(pair.meta.name, name);
-    }, () => mod.hide());
+    }, () => {}, () => mod.hide());
     mod.show();
   }
 
   private deployContract(): MenuItemConstructorOptions {
     const beforeClick = (): boolean => {
-      // if (!this.state.api || !this.props.isConnected) {
-      //   atom.notifications.addError("Not connected to node");
-      //   return true;
-      // }
+      if (!this.state.api || !this.props.isConnected) {
+        atom.notifications.addError("Not connected to node");
+        return true;
+      }
       return false;
     };
     const label = 'Deploy contract';

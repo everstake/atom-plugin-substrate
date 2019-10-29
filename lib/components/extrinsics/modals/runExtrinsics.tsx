@@ -90,7 +90,7 @@ export class RunExtrinsics extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Confirm"
+            title="Run extrinsic"
             onClick={() => this.handleConfirm()}
           />
         </div>
@@ -173,20 +173,32 @@ export class RunExtrinsics extends React.Component<Props, State> {
       atom.notifications.addError("Account must be selected");
       return;
     }
-    this.exec();
+    this.exec().finally(() => {
+      this.setState(DefaultState);
+    });
     this.props.confirmClick();
     this.props.closeModal();
   }
 
   private async exec() {
+    const { account, pass, args } = this.state;
+
+    let pair;
+    try {
+      const acc = this.props.accounts[account];
+      const keyring = new Keyring({ type: "sr25519" });
+      pair = keyring.addFromJson(acc);
+      pair.decodePkcs8(pass);
+    } catch (err) {
+      atom.notifications.addError(`Failed to decrypt account: ${err.message}`);
+      return;
+    }
+
     try {
       const con = this.props.api;
-      const keyring = new Keyring({ type: "sr25519" });
-      const account = keyring.addFromJson(this.props.accounts[this.state.account]);
-      const nonce = await con.query.system.accountNonce(account.address);
+      const nonce = await con.query.system.accountNonce(pair.address);
       const extrinsic = this.getExtrinsic().value;
-      const unsignedTx = extrinsic(...this.state.args);
-      account.decodePkcs8(this.state.pass);
+      const unsignedTx = extrinsic(...args);
 
       const signedTx = unsignedTx.sign(account, { nonce: nonce as any });
       await signedTx.send(({ events = [], status }: any) => {

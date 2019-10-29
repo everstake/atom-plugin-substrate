@@ -43,7 +43,7 @@ const DefaultState: State = {
     path: "",
   },
   contract_name: "",
-  endowment: "1000000000000000",
+  endowment: "100000000000000000",
   max_gas: "500000",
   args: [],
 };
@@ -90,7 +90,7 @@ export class DeployContract extends React.Component<Props, State> {
           className="endowment"
           type="number"
           title="Allotted endowment"
-          placeholder="1000000000000000"
+          placeholder=""
           value={this.state.endowment}
           onChange={(val: string) => this.setState({ endowment: val })}
         />
@@ -98,7 +98,7 @@ export class DeployContract extends React.Component<Props, State> {
           className="gas"
           type="number"
           title="Maximum gas"
-          placeholder="500000"
+          placeholder=""
           value={this.state.max_gas}
           onChange={(val: string) => this.setState({ max_gas: val })}
         />
@@ -125,7 +125,7 @@ export class DeployContract extends React.Component<Props, State> {
           />
           <DefaultButtonComponent
             className="confirm"
-            title="Add existing code"
+            title="Deploy contract"
             onClick={() => this.handleConfirm()}
           />
         </div>
@@ -217,16 +217,25 @@ export class DeployContract extends React.Component<Props, State> {
       this.props.confirmClick({ name: contract_name, address, abi: abi.abiJson! });
     }).catch(err => {
       atom.notifications.addError(`Upload wasm failed with error: ${err.message}`);
+    }).finally(() => {
+      this.setState(DefaultState);
     });
     this.props.closeModal();
   }
 
   private async exec(callback: (address: string) => void) {
     const { account, pass, code, abi, max_gas, endowment, args } = this.state;
-    const acc = this.props.accounts[account];
-    const keyring = new Keyring({ type: "sr25519" });
-    const pair = keyring.addFromJson(acc);
-    pair.decodePkcs8(pass);
+
+    let pair;
+    try {
+      const acc = this.props.accounts[account];
+      const keyring = new Keyring({ type: "sr25519" });
+      pair = keyring.addFromJson(acc);
+      pair.decodePkcs8(pass);
+    } catch (err) {
+      atom.notifications.addError(`Failed to decrypt account: ${err.message}`);
+      return;
+    }
 
     try {
       const contractAbi = new Abi(JSON.parse(abi.abiJson!));
