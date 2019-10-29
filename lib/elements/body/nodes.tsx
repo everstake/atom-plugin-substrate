@@ -195,6 +195,7 @@ class NodesBodyPanel extends React.Component<Props, State> {
         if (this.props.connectedNode === oldNode.name) {
           this.props.updateConnectedNode(node.name);
         }
+        this.forceUpdate();
       },
       () => mod.hide(),
     );
