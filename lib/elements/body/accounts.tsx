@@ -11,7 +11,7 @@ import { initMenuItem, initAccountContextItemModal } from "../../components/moda
 import { AccountComponent, ContextItem } from "../../components/accounts/account";
 import { AddAccount } from "../../components/accounts/modals/addAccount";
 import { ImportAccount } from "../../components/accounts/modals/importAccount";
-import { RenameAccount } from "../../components/accounts/modals/RenameAccount";
+import { RenameAccount } from "../../components/accounts/modals/renameAccount";
 import { TabComponent } from "../../components/tab";
 import { AppState } from "../../store";
 import { TabsState } from "../../store/modules/tabs/types";
