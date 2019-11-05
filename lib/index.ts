@@ -51,7 +51,11 @@ module.exports = new class SubstratePlugin {
   }
 
   public serialize(): State {
-    const reduxState = this.props.store.getState();
+    const store = this.props.store;
+    if (!store) {
+      return { reduxState: "" };
+    }
+    const reduxState = store.getState();
     return { reduxState: JSON.stringify(reduxState) };
   }
 
@@ -83,7 +87,7 @@ module.exports = new class SubstratePlugin {
       })
     );
     if (state) {
-      this.props.store = this.getState(state);
+      this.setState(state);
     }
     const reduxState = this.props.store.getState();
     if (!reduxState.tabs.panels.length) {
@@ -108,19 +112,17 @@ module.exports = new class SubstratePlugin {
     }
   }
 
-  private getState(state: State): any {
+  private setState(state: State): any {
     const rdst = state.reduxState;
-    if (!rdst) {
+    if (rdst && rdst.trim().length) {
+      const reduxState = JSON.parse(state.reduxState);
+      this.props.store = configureStore(reduxState);
       return;
     }
-    if (rdst.length) {
-      const reduxState = JSON.parse(state.reduxState);
-      return configureStore(reduxState);
-    }
-    return {
+    this.props.store = configureStore({
       tabs: tabsIS,
       substrate: substrateIS,
-    };
+    });
   }
 
   private async installDeps() {
