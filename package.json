@@ -20,7 +20,17 @@
       "versions": {
         "^1.0.0": "consumeStatusBar"
       }
+    },
+    "console-panel": {
+      "versions": {
+        "^1.0.0": "consumeConsolePanel"
+      }
     }
+  },
+  "package-dependencies": {
+    "atom-ide-ui": "0.13.0",
+    "ide-rust": "0.21.1",
+    "console-panel": "0.3.1"
   },
   "atomTranspilers": [
     {
@@ -41,7 +51,7 @@
     "@polkadot/api-contract": "^0.95.1",
     "@polkadot/keyring": "^1.5.1",
     "@polkadot/util-crypto": "^1.5.1",
-    "atom-package-deps": "^5.1.0",
+    "atom-package-dependencies": "^1.0.3",
     "atom-ts-transpiler": "^1.5.2",
     "clipboardy": "^2.1.0",
     "list": "^2.0.14",

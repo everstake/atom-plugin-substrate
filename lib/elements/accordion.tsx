@@ -8,7 +8,8 @@ import { AppState } from "../store";
 import { TabsState } from "../store/modules/tabs/types";
 
 export interface Props {
-  tabs: TabsState,
+  tabs: TabsState;
+  logger?: any;
 };
 
 interface State {};
@@ -17,7 +18,7 @@ class AccordionPanel extends React.Component<Props, State> {
   public render(): JSX.Element {
     const panels = this.props.tabs.panels;
     const tabs = panels.map((val) => {
-      const props = { key: val.id, id: val.id };
+      const props = { key: val.id, id: val.id, logger: this.props.logger };
       switch (val.id) {
         case 0:
           return <NodesBodyPanel {...props} />

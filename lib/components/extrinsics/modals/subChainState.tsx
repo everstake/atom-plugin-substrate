@@ -55,17 +55,19 @@ export class SubChainState extends React.Component<Props, State> {
           })}
         />
         {this.renderArguments()}
+        <div className="buttons">
+          <DefaultButtonComponent
+            className="confirm"
+            title="Subscribe for chain state"
+            onClick={() => this.handleConfirm()}
+          />
+        </div>
         {this.renderResult()}
         <div className="buttons">
           <DefaultButtonComponent
             className="cancel"
             title="Cancel"
             onClick={this.props.closeModal}
-          />
-          <DefaultButtonComponent
-            className="confirm"
-            title="Subscribe for chain state"
-            onClick={() => this.handleConfirm()}
           />
         </div>
       </ModalComponent>

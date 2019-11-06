@@ -2,6 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { CompositeDisposable } from "atom";
 import * as Path from "path";
+import * as apd from "atom-package-dependencies";
 
 import { SidebarPanel, Props } from "./elements/sidebar";
 import configureStore from "./store";
@@ -57,6 +58,10 @@ module.exports = new class SubstratePlugin {
     }
     const reduxState = store.getState();
     return { reduxState: JSON.stringify(reduxState) };
+  }
+
+  public consumeConsolePanel(consolePanel: any) {
+    this.props.logger = consolePanel;
   }
 
   public consumeStatusBar(statusBar: any) {
@@ -126,10 +131,9 @@ module.exports = new class SubstratePlugin {
   }
 
   private async installDeps() {
-    const deps = require("atom-package-deps");
-    await deps.install("atom-ide-ui");
-    await deps.install("ide-rust");
-    console.log('All dependencies installed, starting plugin.');
+    apd.install(() => {
+      console.log('All dependencies installed, starting substrate-plugin.');
+    });
   }
 
   private async toggle() {}

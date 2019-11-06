@@ -8,14 +8,14 @@ This extension provides the following features to enhance your experience in dev
 
 1. __Manage nodes and connections__
    1. [Add node](#add-node)
-   <!-- 2. [Start local node](#start-local-node)
+   2. [Start local node](#start-local-node)
    3. [Stop local node](#stop-local-node)
-   4. [Clear chain data](#clear-chain-data) -->
-   2. [Edit types](#edit-types)
-   3. [Connect to node](#connect-to-node)
-   4. [Edit node](#edit-node)
-   5. [Remove node](#remove-node)
-   6. [Disconnect from node](#disconnect-from-node)
+   4. [Clear chain data](#clear-chain-data)
+   5. [Edit types](#edit-types)
+   6. [Connect to node](#connect-to-node)
+   7. [Edit node](#edit-node)
+   8. [Remove node](#remove-node)
+   9. [Disconnect from node](#disconnect-from-node)
 2. __Manage accounts__
    1. [Add account](#add-account)
    2. [Create account](#create-account)
@@ -55,18 +55,18 @@ List of all available commands of the plugin:
 ### Add node <sup><sub> [#panel-navigation](#tags)
 
 That command will add node to the plugin storage, after that you will be able to connect to it and execute extrinsics and subscribe for data.
-<!-- 
+
 ### Start local node <sup><sub> [#directory-with-substrate-project](#tags)
 
-That command will run script in VSCode terminal (in local directory) to start local node in development mode.
+That command will spawn `start` command, that will start local node in development mode (in local directory) and open Atom console panel.
 
 ### Stop local node <sup><sub> [#directory-with-substrate-project](#tags)
 
-That command will stop local node and close the VSCode terminal. If no running terminal with node - it will ignore the execution of the command.
+That command will stop local node and close the Atom console panel. If no running terminal with node - it will ignore the execution of the command.
 
 ### Clear chain data <sup><sub> [#directory-with-substrate-project](#tags)
 
-That command will run the `purge-chain` script in VSCode terminal. If no running terminal - it will ignore the execution of the command. -->
+That command will spawn the `purge-chain` command and send output to Atom console panel. If no running node - it will ignore the execution of the command.
 
 ### Edit types <sup><sub> [#panel-navigation](#tags)
 

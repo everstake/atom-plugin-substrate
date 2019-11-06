@@ -2,6 +2,7 @@ import * as React from "react";
 import * as fs from "fs";
 import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
+import { spawn, exec, ChildProcess } from "child_process";
 
 import { getTypesPath } from "../helpers";
 import { initMenuItem, initAccountContextItemModal } from "../../components/modal";
@@ -19,6 +20,7 @@ const { Menu, MenuItem } = remote;
 
 export interface Props {
   id: number;
+  logger?: any;
 
   tabs: TabsState;
   nodes: INode[];
@@ -37,6 +39,9 @@ interface State {
   tabMenu: MenuType;
 
   contextItems: ContextItem[];
+
+  startedNode?: ChildProcess;
+  purgeNode?: ChildProcess;
 };
 
 class NodesBodyPanel extends React.Component<Props, State> {
@@ -64,10 +69,16 @@ class NodesBodyPanel extends React.Component<Props, State> {
     tabMenu.append(new MenuItem(this.editTypes()));
     tabMenu.append(new MenuItem(this.disconnectFromNode()));
     tabMenu.append(new MenuItem({ type: "separator" }));
-    // tabMenu.append(new MenuItem(this.startLocalNode()));
-    // tabMenu.append(new MenuItem(this.stopLocalNode()));
-    // tabMenu.append(new MenuItem(this.clearChainData()));
+    tabMenu.append(new MenuItem(this.startLocalNode()));
+    tabMenu.append(new MenuItem(this.stopLocalNode()));
+    tabMenu.append(new MenuItem(this.clearChainData()));
     this.setState({ tabMenu });
+  }
+
+  componentWillUnmount() {
+    if (this.state.startedNode) {
+      this.state.startedNode.kill();
+    }
   }
 
   public render(): JSX.Element {
@@ -141,37 +152,114 @@ class NodesBodyPanel extends React.Component<Props, State> {
     return { label, click: confirm, enabled: true };
   }
 
-  // private startLocalNode(): MenuItemType {
-  //   const label = 'Start local node';
-  //   const confirm = () => {
-  //     const packages = atom.packages.getActivePackages();
-  //     const pkg = packages.find(val => val.name === "atom-ide-terminal");
-  //     if (!pkg) {
-  //       atom.notifications.addError("Atom IDE Terminal not installed");
-  //       return;
-  //     }
-  //     console.log(pkg);
-  //   };
-  //   return { item: { label, click: confirm, enabled: true } };
-  // }
-  //
-  // private stopLocalNode(): MenuItemType {
-  //   const label = 'Stop local node';
-  //   const confirm = () => {
-  //     // Todo:
-  //     this.forceUpdate();
-  //   };
-  //   return { item: { label, click: confirm, enabled: true } };
-  // }
-  //
-  // private clearChainData(): MenuItemType {
-  //   const label = 'Clear chain data';
-  //   const confirm = () => {
-  //     // Todo:
-  //     this.forceUpdate();
-  //   };
-  //   return { item: { label, click: confirm, enabled: true } };
-  // }
+  private startLocalNode(): MenuItemConstructorOptions {
+    const label = 'Start local node';
+    const confirm = () => {
+      const logger = this.props.logger;
+      if (!logger) {
+        const msg = `
+          Console Panel package hasn't installed successfully.
+          Reload or reinstall substrate-plugin
+        `;
+        atom.notifications.addError(msg.trim());
+        return;
+      }
+      if (this.state.startedNode) {
+        this.state.startedNode.kill();
+        this.setState({ startedNode: undefined });
+      }
+      logger.destroy();
+      logger.toggle();
+      const paths = atom.project.getPaths();
+      if (!paths.length) {
+        atom.notifications.addError('Project folder not found');
+        return;
+      }
+      const node = spawn('cargo', ['run', '--', '--dev'], { cwd: paths[0] });
+      node.stdout.on('data', (data: any) => {
+        logger.log(`Start node stdout: ${data}`);
+      });
+      node.stderr.on('data', (data: any) => {
+        logger.error(`Start node stderr: ${data}`);
+      });
+      node.on('close', (code: any) => {
+        logger.log(`Start node process exited with code ${code}`);
+        logger.destroy();
+      });
+      node.on('error', (err: Error) => {
+        atom.notifications.addError(`Failed to start node: ${err.message}`);
+      });
+      this.setState({ startedNode: node });
+    };
+    return { label, click: confirm, enabled: true };
+  }
+
+  private stopLocalNode(): MenuItemConstructorOptions {
+    const label = 'Stop local node';
+    const confirm = () => {
+      const logger = this.props.logger;
+      if (!logger) {
+        const msg = `
+          Console Panel package hasn't installed successfully.
+          Reload or reinstall substrate-plugin
+        `;
+        atom.notifications.addError(msg.trim());
+        return;
+      }
+      if (this.state.startedNode) {
+        this.state.startedNode.kill();
+      }
+      if (this.state.purgeNode) {
+        this.state.purgeNode.kill();
+      }
+      logger.destroy();
+      this.setState({ startedNode: undefined, purgeNode: undefined });
+      logger.log("Node stopped");
+    };
+    return { label, click: confirm, enabled: true };
+  }
+
+  private clearChainData(): MenuItemConstructorOptions {
+    const label = 'Clear chain data';
+    const confirm = () => {
+      const logger = this.props.logger;
+      if (!logger) {
+        const msg = `
+          Console Panel package hasn't installed successfully.
+          Reload or reinstall substrate-plugin
+        `;
+        atom.notifications.addError(msg.trim());
+        return;
+      }
+      logger.toggle();
+      const paths = atom.project.getPaths();
+      if (!paths.length) {
+        atom.notifications.addError('Project folder not found');
+        return;
+      }
+      const purge = exec(`cd ${paths[0]} && cargo run -- purge-chain --dev -y`);
+      if (purge.stdout) {
+        purge.stdout.on('data', (data: string) => {
+          // atom.notifications.addError(`Failed to purge chain: ${data}`);
+          logger.log(`Clear chain data stdout: ${data}`);
+        });
+      }
+      if (purge.stderr) {
+        purge.stderr.on('data', (data: string) => {
+          // atom.notifications.addError(`Failed to purge chain: ${data}`);
+          logger.error(`Clear chain data stderr: ${data}`);
+        });
+      }
+      purge.on('close', (code: number) => {
+        if (code === 0) {
+          atom.notifications.addInfo('Chain purged');
+        }
+        logger.log(`Clear chain data process exited with code ${code}`);
+      });
+      this.setState({ purgeNode: purge });
+    };
+    return { label, click: confirm, enabled: true };
+  }
 
   private removeNode(node: INode) {
     if (this.props.connectedNode === node.name) {
