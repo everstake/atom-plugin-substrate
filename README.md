@@ -42,6 +42,7 @@ Next plugins will be automatically installed with this plugin (if not installed)
 
 * [Atom IDE UI](https://atom.io/packages/atom-ide-ui)
 * [Rust language](https://atom.io/packages/ide-rust)
+* [Console Panel](https://atom.io/packages/console-panel)
 
 ## License
 
