@@ -72,6 +72,8 @@ class NodesBodyPanel extends React.Component<Props, State> {
     tabMenu.append(new MenuItem(this.startLocalNode()));
     tabMenu.append(new MenuItem(this.stopLocalNode()));
     tabMenu.append(new MenuItem(this.clearChainData()));
+    tabMenu.append(new MenuItem({ type: "separator" }));
+    tabMenu.append(new MenuItem(this.installLocalNode()));
     this.setState({ tabMenu });
   }
 
@@ -152,6 +154,40 @@ class NodesBodyPanel extends React.Component<Props, State> {
     return { label, click: confirm, enabled: true };
   }
 
+  private installLocalNode(): MenuItemConstructorOptions {
+    const label = 'Install substrate';
+    const confirm = () => {
+      const logger = this.props.logger;
+      if (!logger) {
+        const msg = `
+          Console Panel package hasn't installed successfully.
+          Reload or reinstall substrate-plugin
+        `;
+        atom.notifications.addError(msg.trim());
+        return;
+      }
+      logger.toggle();
+      const install = exec("curl https://getsubstrate.io -sSf | bash -s -- --fast");
+      if (install.stdout) {
+        install.stdout.on('data', (data: string) => {
+          logger.log(`${data}`);
+        });
+      }
+      if (install.stderr) {
+        install.stderr.on('data', (data: string) => {
+          logger.error(`${data}`);
+        });
+      }
+      install.on('close', (code: number) => {
+        if (code === 0) {
+          atom.notifications.addSuccess('Substrate installed successfully');
+        }
+        logger.log(`Install local node process exited with code ${code}`);
+      });
+    };
+    return { label, click: confirm, enabled: true };
+  }
+
   private startLocalNode(): MenuItemConstructorOptions {
     const label = 'Start local node';
     const confirm = () => {
@@ -177,10 +213,10 @@ class NodesBodyPanel extends React.Component<Props, State> {
       }
       const node = spawn('cargo', ['run', '--', '--dev'], { cwd: paths[0] });
       node.stdout.on('data', (data: any) => {
-        logger.log(`Start node stdout: ${data}`);
+        logger.log(`${data}`);
       });
       node.stderr.on('data', (data: any) => {
-        logger.error(`Start node stderr: ${data}`);
+        logger.error(`${data}`);
       });
       node.on('close', (code: any) => {
         logger.log(`Start node process exited with code ${code}`);
@@ -241,13 +277,13 @@ class NodesBodyPanel extends React.Component<Props, State> {
       if (purge.stdout) {
         purge.stdout.on('data', (data: string) => {
           // atom.notifications.addError(`Failed to purge chain: ${data}`);
-          logger.log(`Clear chain data stdout: ${data}`);
+          logger.log(`${data}`);
         });
       }
       if (purge.stderr) {
         purge.stderr.on('data', (data: string) => {
           // atom.notifications.addError(`Failed to purge chain: ${data}`);
-          logger.error(`Clear chain data stderr: ${data}`);
+          logger.error(`${data}`);
         });
       }
       purge.on('close', (code: number) => {

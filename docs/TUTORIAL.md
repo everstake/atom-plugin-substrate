@@ -130,3 +130,35 @@ To execute contract extrinsics go to `Extrinsics | Chain state | Contracts` pane
 After successful call of contract you will see similar result to this:
 
 ![Successful call contract](images/contracts/8.png "Successful call contract")
+
+## Start local development
+
+To start development of `substrate` you will need to install rust and substrate dependencies. But plugin can do it with one command.
+
+### Step 1: Install substrate
+
+After substrate plugin is installation, open sidebar and go to `My node connections` panel, click on che `...` button and select `Install substrate`.
+
+![Install substrate](images/dev/1.png "Install substrate")
+
+After installation completion you will see similar result to this:
+
+![Installed substrate](images/dev/2.png "Installed substrate")
+
+### Step 2: Start local node
+
+To start local node in development mode go to `My node connections` panel, click on the `...` button and select `Start local node`.
+
+![Start local node](images/dev/3.png "Start local node")
+
+To stop local node go to `My node connections` panel, click on the `...` button and select `Stop local node`. This will kill spawned command.
+
+![Stop local node](images/dev/4.png "Stop local node")
+
+To clear local node chain data (in development mode) go to `My node connections` panel, click on the `...` button and select `Clear chain data`. This will run `purge-chain`.
+
+![Clear chain data](images/dev/5.png "Clear chain data")
+
+### Step 3: Development
+
+Everything installed and you are ready for hacking!
