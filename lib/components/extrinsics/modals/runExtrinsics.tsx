@@ -190,7 +190,7 @@ export class RunExtrinsics extends React.Component<Props, State> {
       pair = keyring.addFromJson(acc);
       pair.decodePkcs8(pass);
     } catch (err) {
-      atom.notifications.addError(`Failed to decrypt account: ${err.message}`);
+      atom.notifications.addError("Wrong account passphrase");
       return;
     }
 

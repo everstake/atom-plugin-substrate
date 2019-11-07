@@ -3,6 +3,8 @@ import * as fs from "fs";
 import { Menu as MenuType, MenuItemConstructorOptions, remote } from "electron";
 import { connect } from "react-redux";
 import { spawn, exec, ChildProcess } from "child_process";
+import * as sudo from "sudo-prompt";
+import * as os from "os";
 
 import { getTypesPath } from "../helpers";
 import { initMenuItem, initAccountContextItemModal } from "../../components/modal";
@@ -167,6 +169,28 @@ class NodesBodyPanel extends React.Component<Props, State> {
         return;
       }
       logger.toggle();
+      this.installSubstrate(logger);
+    };
+    return { label, click: confirm, enabled: true };
+  }
+
+  private installSubstrate(logger: any) {
+    const type = os.type();
+    if (type === "Linux" || type === "Windows_NT") {
+      sudo.exec("curl https://getsubstrate.io -sSf | bash -s -- --fast", {
+        name: 'Atom Substrate Plugin',
+      }, (error: Error, stdout: string, stderr: string) => {
+        if (error) {
+          logger.error(`Substrate not installed: ${error.message}`);
+        }
+        if (stdout.trim().length) {
+          logger.log(stdout);
+        }
+        if (stderr.trim().length) {
+          logger.error(stderr);
+        }
+      });
+    } else {
       const install = exec("curl https://getsubstrate.io -sSf | bash -s -- --fast");
       if (install.stdout) {
         install.stdout.on('data', (data: string) => {
@@ -184,8 +208,7 @@ class NodesBodyPanel extends React.Component<Props, State> {
         }
         logger.log(`Install local node process exited with code ${code}`);
       });
-    };
-    return { label, click: confirm, enabled: true };
+    }
   }
 
   private startLocalNode(): MenuItemConstructorOptions {
