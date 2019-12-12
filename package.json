@@ -59,6 +59,7 @@
     "react-dom": "^16.10.1",
     "react-redux": "^7.1.1",
     "redux": "^4.0.4",
+    "sudo-prompt": "^9.1.1",
     "typescript": "^3.0.3"
   },
   "devDependencies": {
